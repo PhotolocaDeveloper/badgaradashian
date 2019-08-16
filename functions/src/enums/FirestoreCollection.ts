@@ -1,4 +1,13 @@
 export enum FirestoreCollection {
     Users = 'users',
-    UserSettings = 'user_settings'
+    UserSettings = 'user_settings',
+    Housings = 'objects',
+    Rooms = 'rooms',
+    Inventories = 'inventory',
+    InventoryLists = 'inventory_lists',
+    Buies = 'buys',
+    BuyLists = 'buys_lists',
+    Tasks = 'tasks',
+    TaskLists = 'to_do_list_object',
+    Notifications = 'notifications'
 }
