@@ -1,11 +1,10 @@
-import {NotificationBuilder} from "../abstract/NotificationBuilder";
-import {NotificationClickAction} from "../../enums/NotificationClickAction";
-import {NotificationApnsCategory} from "../../enums/NotificationApnsCategory";
-import {AppEvent} from "../../enums/AppEvent";
+import {NotificationBuilder} from "../../abstract/NotificationBuilder";
+import {NotificationClickAction} from "../../../enums/NotificationClickAction";
+import {NotificationApnsCategory} from "../../../enums/NotificationApnsCategory";
+import {AppEvent} from "../../../enums/AppEvent";
 import * as admin from "firebase-admin";
-import {Inventory} from "../model/Inventory";
-import {NotificationMessage} from "../model/NotificationMessage";
-import {NotificationType} from "../../enums/NotificationType";
+import {Inventory} from "../../model/Inventory";
+import {NotificationType} from "../../../enums/NotificationType";
 import Firestore = admin.firestore;
 
 export class InventoryEndsNotifBuilder extends NotificationBuilder {
@@ -57,7 +56,8 @@ export class InventoryEndsNotifBuilder extends NotificationBuilder {
         if (this.notification == null) return;
         let title = this.titleTemplate;
         let body = this.bodyTemplate;
-        this.notification.notification = new NotificationMessage(title, body);
+        this.notification.notificationTitle = title;
+        this.notification.notificationBody = body;
     }
 
     buildPlanedDateToDispatch(): void {
