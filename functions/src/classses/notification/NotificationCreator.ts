@@ -11,6 +11,9 @@ export class NotificationCreator {
         return this.notificationBuilder.notification;
     }
 
+    /**
+     * Создаёт объект NotificationPlanned
+     */
     public constructNotification() {
         this.notificationBuilder.createNotification();
         this.notificationBuilder.buildAndroidClickAction();
