@@ -3,17 +3,38 @@ import * as admin from "firebase-admin";
 
 import Firestore = admin.firestore;
 import {NotificationMessage} from "./NotificationMessage";
+import {AppEvent} from "../../enums/AppEvent";
+import {NotificationType} from "../../enums/NotificationType";
 
 @Serializable()
 export class NotificationPlanned {
-    constructor(
-        @JsonProperty() public type: string,
-        @JsonProperty() public relatedObject: Firestore.DocumentReference,
-        @JsonProperty() public notification: NotificationMessage,
-        @JsonProperty('notification_data') public notificationData: Map<string, any>,
-        @JsonProperty('android_click_action') public androidClickAction: string,
-        @JsonProperty('apns_category') public apnsCategory: string,
-        @JsonProperty('planned_date_of_dispatch') public plannedDateOfDispatch: Firestore.Timestamp,
-        @JsonProperty('resending_period') public resendingPeriod: number
-    ) {}
+
+    @JsonProperty('recipient') public recipient: string | null | Array<string> = null;
+
+    @JsonProperty() type: NotificationType | null = null;
+
+    @JsonProperty()
+    relatedObject: Firestore.DocumentReference | null = null;
+
+    @JsonProperty()
+    notification: NotificationMessage | null = null;
+
+    @JsonProperty('notification_data')
+    notificationData: any | null = null;
+
+    @JsonProperty('android_click_action')
+    androidClickAction: string | null = null;
+
+    @JsonProperty('apns_category')
+    apnsCategory: string | null = null;
+
+    @JsonProperty('planned_date_of_dispatch')
+    plannedDateOfDispatch: Firestore.Timestamp | null = null;
+
+    @JsonProperty('resending_period')
+    resendingPeriod: number | null = null;
+
+    @JsonProperty()
+    event: AppEvent | null = null;
+
 }
