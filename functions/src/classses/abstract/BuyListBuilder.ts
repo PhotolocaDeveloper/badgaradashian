@@ -1,23 +1,18 @@
 import {BuyList} from "../model/BuyList";
+import * as admin from "firebase-admin";
 
 export abstract class BuyListBuilder {
 
-    get buyList(): BuyList | null {
-        return this._buyList;
-    }
-
-    set buyList(value: BuyList | null) {
-        this._buyList = value;
-    }
-
-    private _buyList: BuyList | null = null;
+    buyList?: BuyList;
 
     createBuyList() {
-        this.buyList = new BuyList();
+        const buyList = new BuyList();
+        buyList.dateCreated = admin.firestore.Timestamp.now();
+        this.buyList = buyList;
     }
 
+    abstract buildIsHidden(): void;
     abstract buildName(): void;
     abstract buildUser(): void;
-    abstract buildDateCreation(): void;
 
 }
