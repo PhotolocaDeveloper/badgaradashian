@@ -5,7 +5,7 @@ export enum FirestoreCollection {
     Rooms = 'rooms',
     Inventories = 'inventory',
     InventoryLists = 'inventory_lists',
-    Buies = 'buys',
+    Buys = 'buys',
     BuyLists = 'buys_lists',
     Tasks = 'tasks',
     TaskLists = 'to_do_list_object',

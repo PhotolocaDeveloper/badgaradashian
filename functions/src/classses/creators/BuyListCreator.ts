@@ -6,13 +6,14 @@ export class BuyListCreator {
         private builder: BuyListBuilder
     ) {}
 
-    get buyList() : BuyList | null {
+    get buyList(): BuyList | undefined {
         return this.builder.buyList
     }
 
     create() {
+        this.builder.createBuyList();
         this.builder.buildName();
         this.builder.buildUser();
-        this.builder.buildDateCreation();
+        this.builder.buildIsHidden();
     }
 }

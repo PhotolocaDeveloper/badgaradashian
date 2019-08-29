@@ -1,14 +1,14 @@
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
 import {deserialize, serialize} from "typescript-json-serializer";
 import {Inventory} from "../classses/model/Inventory";
-import {InventoryEndsNotifBuilder} from "../classses/notification/builders/InventoryEndsNotifBuilder";
-import {NotificationCreator} from "../classses/notification/NotificationCreator";
+import {InventoryEndsNotifBuilder} from "../classses/builders/notifications/InventoryEndsNotifBuilder";
+import {NotificationCreator} from "../classses/creators/NotificationCreator";
 import {EventContext} from "firebase-functions";
 import * as admin from "firebase-admin";
 import {FirestoreCollection} from "../enums/FirestoreCollection";
 
 export function onInventoryCreateHandler(snapshot: DocumentSnapshot, context: EventContext) {
-    if (context.auth == null) return;
+    if (context.auth === undefined) return;
     return createOnInventoryEndsNotification(context.auth.uid, snapshot);
 }
 

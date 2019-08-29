@@ -21,56 +21,59 @@ export class InventoryEndsNotifBuilder extends NotificationBuilder {
     public bodyTemplate = "Cрок службы инветнаря заканчивается {date_ends}";
 
     buildRecipient(): void {
-        if (this.notification == null) return;
+        if (this.notification === null) return;
         this.notification.recipient = this.recipientId;
     }
 
     buildType(): void {
-        if (this.notification == null) return;
+        if (this.notification === null) return;
         this.notification.type = NotificationType.Personal
     }
 
     buildAndroidClickAction(): void {
-        if (this.notification == null) return;
+        if (this.notification === null) return;
         this.notification.androidClickAction = NotificationClickAction.ShowInventory
     }
 
     buildApnsCategory(): void {
-        if (this.notification == null) return;
+        if (this.notification === null) return;
         this.notification.apnsCategory = NotificationApnsCategory.InventoryEnds
     }
 
     buildEvent(): void {
-        if (this.notification == null) return;
+        if (this.notification === null) return;
         this.notification.event = AppEvent.InventoryEnds
     }
 
     buildNotificationData(): void {
-        if (this.notification == null) return;
+        if (this.notification === null) return;
         this.notification.notificationData = {
             "inventory_id": this.relatedObject.id
         }
     }
 
     buildNotificationMessage(): void {
-        if (this.notification == null) return;
-        let title = this.titleTemplate;
-        let body = this.bodyTemplate;
+        if (this.notification === null) return;
+        const title = this.titleTemplate;
+        const body = this.bodyTemplate;
         this.notification.notificationTitle = title;
         this.notification.notificationBody = body;
     }
 
     buildPlanedDateToDispatch(): void {
-        if (this.notification == null) return;
-        let dateToDispatch = this.inventory.nextReplacementDate.toMillis() - 3600 * 1000;
+        if (this.notification === null) return;
+        const dateToDispatch = this.inventory.nextReplacementDate.toMillis() - 3600 * 1000;
         this.notification.plannedDateOfDispatch = Firestore.Timestamp.fromMillis(dateToDispatch);
     }
 
     buildRelatedObject(): void {
-        if (this.notification == null) return;
+        if (this.notification === null) return;
         this.notification.relatedObject = this.relatedObject
     }
 
-    buildResendingPeriod(): void {}
+    buildResendingPeriod(): void {
+        if (this.notification === null) return;
+        this.notification.resendingPeriod = null
+    }
 
 }
