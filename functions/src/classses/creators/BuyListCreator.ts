@@ -1,13 +1,13 @@
-import {BuyListBuilder} from "../abstract/BuyListBuilder";
-import {BuyList} from "../model/BuyList";
+import {ShoppingListBuilder} from "../abstract/ShoppingListBuilder";
+import {ShoppingList} from "../model/ShoppingList";
 
 export class BuyListCreator {
     constructor(
-        private builder: BuyListBuilder
+        private builder: ShoppingListBuilder
     ) {}
 
-    get buyList(): BuyList | undefined {
-        return this.builder.buyList
+    get buyList(): ShoppingList | undefined {
+        return this.builder.shoppingList
     }
 
     create() {

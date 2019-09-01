@@ -1,14 +1,14 @@
-import {BuyList} from "../model/BuyList";
+import {ShoppingList} from "../model/ShoppingList";
 import * as admin from "firebase-admin";
 
-export abstract class BuyListBuilder {
+export abstract class ShoppingListBuilder {
 
-    buyList?: BuyList;
+    shoppingList?: ShoppingList;
 
     createBuyList() {
-        const buyList = new BuyList();
+        const buyList = new ShoppingList();
         buyList.dateCreated = admin.firestore.Timestamp.now();
-        this.buyList = buyList;
+        this.shoppingList = buyList;
     }
 
     abstract buildIsHidden(): void;
