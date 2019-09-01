@@ -13,13 +13,34 @@ import {IdentifierCreator} from "../classses/creators/IdentifierCreator";
 
 export function onInventoryCreateHandler(snapshot: DocumentSnapshot, context: EventContext) {
     if (context.auth === undefined) return;
+
+    const promises: Promise<any>[] = [];
+
     const createOnInventoryEndsNotificationPromise = createOnInventoryEndsNotification(context.auth.uid, snapshot);
     const createShoppingListItemPromise = createShoppingListItem(context.auth.uid, snapshot);
-    return Promise.all([createOnInventoryEndsNotificationPromise, createShoppingListItemPromise])
+
+    if (createOnInventoryEndsNotificationPromise !== undefined) {
+        promises.push(createOnInventoryEndsNotificationPromise)
+    }
+
+    if (createShoppingListItemPromise !== undefined) {
+        promises.push(createShoppingListItemPromise)
+    }
+
+    return Promise.all(promises)
 }
 
-function createOnInventoryEndsNotification(uid: string, snapshot: DocumentSnapshot): Promise<any> {
+/***
+ * Добавляет уведомление о замене инвентаря
+ * @param uid
+ * @param snapshot
+ */
+function createOnInventoryEndsNotification(uid: string, snapshot: DocumentSnapshot): Promise<any> | undefined {
     const inventory = deserialize(snapshot.data(), Inventory);
+
+    if (inventory.nextReplacementDate === undefined) {
+        return undefined;
+    }
 
     const notificationBuilder = new InventoryEndsNotifBuilder(uid, snapshot.ref, inventory);
     const notificationCreator = new NotificationCreator(notificationBuilder);
@@ -30,8 +51,17 @@ function createOnInventoryEndsNotification(uid: string, snapshot: DocumentSnapsh
     return admin.firestore().collection(FirestoreCollection.Notifications).doc().create(serialize(notification));
 }
 
-function createShoppingListItem(uid: string, snapshot: DocumentSnapshot): Promise<any> {
+/**
+ * Добавляет покупку если установленна дата замены
+ * @param uid
+ * @param snapshot
+ */
+function createShoppingListItem(uid: string, snapshot: DocumentSnapshot): Promise<any> | undefined {
     const inventory = deserialize(snapshot.data(), Inventory);
+
+    if (inventory.nextReplacementDate === undefined) {
+        return undefined;
+    }
 
     const userLink = admin.firestore().collection(FirestoreCollection.Users).doc(uid);
 
