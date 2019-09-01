@@ -3,7 +3,7 @@ import * as admin from "firebase-admin";
 
 export abstract class ShoppingListBuilder {
 
-    shoppingList?: ShoppingList;
+    shoppingList!: ShoppingList;
 
     createBuyList() {
         const buyList = new ShoppingList();
