@@ -37,7 +37,7 @@ export class SLIBFromInventory extends ShoppingListItemBuilder {
     }
 
     buildName(): void {
-        this.shoppingListItem.name = `Купить ${this.inventory.name} для замены`;
+        this.shoppingListItem.name = `Купить "${this.inventory.name}" для замены`;
     }
 
     buildHousing(): void {

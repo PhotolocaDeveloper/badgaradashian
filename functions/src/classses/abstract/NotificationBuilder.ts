@@ -2,18 +2,10 @@ import {NotificationPlanned} from "../model/NotificationPlanned";
 
 export abstract class NotificationBuilder {
 
-    private _notification: NotificationPlanned | null = null;
+    notification!: NotificationPlanned;
 
     createNotification() {
-        this._notification = new NotificationPlanned();
-    }
-
-    get notification(): NotificationPlanned | null {
-        return this._notification;
-    }
-
-    set notification(value: NotificationPlanned | null) {
-        this._notification = value;
+        this.notification = new NotificationPlanned();
     }
 
     abstract buildType(): void;
