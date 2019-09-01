@@ -97,7 +97,7 @@
     // These rules are intended to help developers use better style. Simpler code has fewer bugs. These would be "info"
     // if TSLint supported such a level.
 
-    // prefer for( ... of ... ) to an index loop when the index is only used to fetch an object from an array.
+    // prefer for( ... of ... ) to an index loop when the index is only used to fetch an housing from an array.
     // (Even better: check out utils like .map if transforming an array!)
     "prefer-for-of": {"severity": "warning"},
 
@@ -106,8 +106,7 @@
 
     // Prefer const for values that will not change. This better documents code.
     "prefer-const": {"severity": "warning"},
-
-    // Multi-line object literals and function calls should have a trailing comma. This helps avoid merge conflicts.
+    // Multi-line housing literals and function calls should have a trailing comma. This helps avoid merge conflicts.
     "trailing-comma": {"severity": "warning"}
   },
 

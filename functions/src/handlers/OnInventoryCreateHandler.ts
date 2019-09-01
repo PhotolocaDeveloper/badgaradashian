@@ -14,9 +14,12 @@ export function onInventoryCreateHandler(snapshot: DocumentSnapshot, context: Ev
 
 function createOnInventoryEndsNotification(uid: string, snapshot: DocumentSnapshot) {
     const inventory = deserialize(snapshot.data(), Inventory);
+
     const notificationBuilder = new InventoryEndsNotifBuilder(uid, snapshot.ref, inventory);
     const notificationCreator = new NotificationCreator(notificationBuilder);
+
     notificationCreator.constructNotification();
+
     const notification = notificationCreator.getNotification();
     return admin.firestore().collection(FirestoreCollection.Notifications).doc().create(serialize(notification));
 }
