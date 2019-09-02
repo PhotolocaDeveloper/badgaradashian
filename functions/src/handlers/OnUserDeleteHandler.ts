@@ -1,6 +1,7 @@
 import {UserRecord} from "firebase-functions/lib/providers/auth";
 import * as admin from "firebase-admin";
 import {FirestoreCollection} from "../enums/FirestoreCollection";
+import {FirestoreHelper} from "../classses/helpers/FirestoreHelper";
 
 /***
  * Удаляет настройки связанные с поьзователем после его удаленяия
@@ -13,9 +14,5 @@ export function onUserDeleteHandler(userRecord: UserRecord) {
         .collection(FirestoreCollection.UserSettings)
         .where("user_id", "==", userId)
         .get()
-        .then(removeUserSettings)
-}
-
-function removeUserSettings(querySnapshot: FirebaseFirestore.QuerySnapshot) {
-    querySnapshot.docs.forEach( document => document.ref.delete() )
+        .then(FirestoreHelper.deleteAllFilesInQuery)
 }
