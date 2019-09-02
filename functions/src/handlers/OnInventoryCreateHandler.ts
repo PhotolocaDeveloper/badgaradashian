@@ -74,7 +74,7 @@ function createShoppingListItem(uid: string, snapshot: DocumentSnapshot): Promis
 
     const shoppingListLink = admin.firestore().collection(FirestoreCollection.BuyLists).doc(shoppingListId);
 
-    const shoppingListItemBuilder = new SLIBFromInventory(inventory, shoppingListLink, userLink);
+    const shoppingListItemBuilder = new SLIBFromInventory(inventory, snapshot.ref, shoppingListLink, userLink);
     const shoppingListItemCreator = new ShoppingListItemCreator(shoppingListItemBuilder);
 
     shoppingListItemCreator.construct();
