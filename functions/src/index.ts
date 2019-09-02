@@ -11,6 +11,7 @@ import {
     onPhotoDeleteHandler,
     onShoppingListItemCreateHandler,
     onShoppingListItemDeleteHandler,
+    onShoppingListItemUpdateHandler,
     onUserCreateHandler,
     onUserDeleteHandler
 } from "./handlers";
@@ -59,6 +60,10 @@ export const onShoppingListItemCreate = functions.firestore
 export const onShoppingListItemDelete = functions.firestore
     .document(FirestoreCollection.Buys + "/{id}")
     .onDelete(onShoppingListItemDeleteHandler);
+
+export const onShoppingListItemDUpdate = functions.firestore
+    .document(FirestoreCollection.Buys + "/{id}")
+    .onUpdate(onShoppingListItemUpdateHandler);
 
 export const onShoppingListItemPhotosDelete = functions.firestore
     .document(FirestoreCollection.Buys + "/{id}/" + FirestoreCollection.Photos + "/{id}")
