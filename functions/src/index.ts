@@ -4,6 +4,7 @@ import {FirestoreCollection} from "./enums/FirestoreCollection";
 import {
     onInventoryCreateHandler,
     onInventoryDeleteHandler,
+    onInventoryUpdateHandler,
     onPhotoDeleteHandler,
     onUserCreateHandler,
     onUserDeleteHandler
@@ -21,6 +22,10 @@ export const onInventoryCreate = functions.firestore
 export const onInventoryDelete = functions.firestore
     .document(FirestoreCollection.Inventories + "/{id}")
     .onDelete(onInventoryDeleteHandler);
+
+export const onInventoryUpdate = functions.firestore
+    .document(FirestoreCollection.Inventories + "/{id}")
+    .onUpdate(onInventoryUpdateHandler);
 
 export const onInventoryPhotosDelete = functions.firestore
     .document(FirestoreCollection.Inventories + "/{id}/" + FirestoreCollection.Photos + "/{id}")
