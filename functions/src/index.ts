@@ -1,9 +1,7 @@
 import * as functions from 'firebase-functions';
-import {onUserCreateHandler} from "./handlers/OnUserCreateHandler";
 import * as admin from "firebase-admin";
-import {onUserDeleteHandler} from "./handlers/OnUserDeleteHandler";
 import {FirestoreCollection} from "./enums/FirestoreCollection";
-import {onInventoryCreateHandler} from "./handlers/OnInventoryCreateHandler";
+import {onInventoryCreateHandler, onInventoryDeleteHandler, onUserCreateHandler, onUserDeleteHandler} from "./handlers";
 
 admin.initializeApp();
 
@@ -13,3 +11,7 @@ export const onUserDelete = functions.auth.user().onDelete(onUserDeleteHandler);
 export const onInventoryCreate = functions.firestore
     .document(FirestoreCollection.Inventories + "/{id}")
     .onCreate(onInventoryCreateHandler);
+
+export const onInventoryDelete = functions.firestore
+    .document(FirestoreCollection.Inventories + "/{id}")
+    .onDelete(onInventoryDeleteHandler);
