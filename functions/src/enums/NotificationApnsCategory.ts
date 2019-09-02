@@ -1,3 +1,4 @@
 export enum NotificationApnsCategory {
-    InventoryEnds = "InventoryEndsCategory"
+    InventoryEnds = "InventoryEndsCategory",
+    CaseNeedToDo = "CaseNeedToDoCategory",
 }

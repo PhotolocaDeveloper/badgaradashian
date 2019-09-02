@@ -1,3 +1,4 @@
 export enum NotificationClickAction {
-    ShowInventory = "ru.badger.showInventoryAction"
+    ShowInventory = "ru.badger.showInventoryAction",
+    ShowCaseToDo = "ru.badger.showCaseToDo"
 }
