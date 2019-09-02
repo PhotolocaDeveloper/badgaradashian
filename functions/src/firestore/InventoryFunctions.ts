@@ -75,9 +75,8 @@ export namespace InventoryFunctions {
         const notificationBuilder = new InventoryEndsNotifBuilder(uid, snapshot.ref, inventory);
         const notificationCreator = new NotificationCreator(notificationBuilder);
 
-        notificationCreator.constructNotification();
+        const notification = notificationCreator.construct().get();
 
-        const notification = notificationCreator.getNotification();
         return admin.firestore().collection(FirestoreCollection.Notifications).doc().create(serialize(notification));
     }
 
@@ -116,4 +115,5 @@ export namespace InventoryFunctions {
 
         return admin.firestore().collection(FirestoreCollection.Buys).doc().create(serialize(shoppingListItem))
     }
+
 }

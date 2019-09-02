@@ -7,14 +7,14 @@ export class NotificationCreator {
         private notificationBuilder: NotificationBuilder
     ) {}
 
-    public getNotification() : NotificationPlanned | null {
+    public get(): NotificationPlanned | null {
         return this.notificationBuilder.notification;
     }
 
     /**
      * Создаёт объект NotificationPlanned
      */
-    public constructNotification() {
+    public construct(): NotificationCreator {
         this.notificationBuilder.createNotification();
         this.notificationBuilder.buildAndroidClickAction();
         this.notificationBuilder.buildApnsCategory();
@@ -25,6 +25,7 @@ export class NotificationCreator {
         this.notificationBuilder.buildRecipient();
         this.notificationBuilder.buildRelatedObject();
         this.notificationBuilder.buildResendingPeriod();
-        this.notificationBuilder.buildType()
+        this.notificationBuilder.buildType();
+        return this;
     }
 }
