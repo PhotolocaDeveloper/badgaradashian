@@ -9,6 +9,7 @@ import {
     onInventoryDeleteHandler,
     onInventoryUpdateHandler,
     onPhotoDeleteHandler,
+    onShoppingListItemCreateHandler,
     onUserCreateHandler,
     onUserDeleteHandler
 } from "./handlers";
@@ -49,3 +50,7 @@ export const onCaseToDoUpdate = functions.firestore
 export const onCaseToDoPhotosDelete = functions.firestore
     .document(FirestoreCollection.Tasks + "/{id}/" + FirestoreCollection.Photos + "/{id}")
     .onDelete(onPhotoDeleteHandler);
+
+export const onShoppingListItemCreate = functions.firestore
+    .document(FirestoreCollection.Buys + "/{id}")
+    .onCreate(onShoppingListItemCreateHandler);
