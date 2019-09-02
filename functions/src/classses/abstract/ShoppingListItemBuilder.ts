@@ -29,5 +29,6 @@ export abstract class ShoppingListItemBuilder {
 
     abstract buildDateCreated(): void;
 
+    abstract buildRelatedObject(): void;
 
 }
