@@ -27,7 +27,7 @@ export class CaseToDoNotifBuilder extends NotificationBuilder {
     }
 
     buildEvent(): void {
-        this.notification.event = AppEvent.NeedToComleteTask
+        this.notification.event = AppEvent.NeedToCompleteTask
     }
 
     buildNotificationData(): void {
