@@ -2,7 +2,7 @@ import {Change, EventContext} from "firebase-functions";
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
 import {deserialize} from "typescript-json-serializer";
 import {Inventory} from "../classses/model/Inventory";
-import {InventoryFunctions} from "../firestore/InventoryFunctions";
+import {Functions} from "../firestore/Functions";
 
 /**
  * Обновляет уведомление о необходимости замены инвентаря и связанные покупки, если изменена дата следующей замены
@@ -13,12 +13,12 @@ export function onInventoryUpdateHandler(change: Change<DocumentSnapshot>, conte
     const inventoryBefore = deserialize(change.before.data(), Inventory);
     const inventoryAfter = deserialize(change.after.data(), Inventory);
 
-    if (inventoryAfter.nextReplacementDate != inventoryBefore.nextReplacementDate) {
+    if (inventoryAfter.nextReplacementDate !== inventoryBefore.nextReplacementDate) {
         return Promise.all([
-            InventoryFunctions.deleteRelatedShoppingListItems(change.before, context),
-            InventoryFunctions.deleteRelatedNotifications(change.before, context),
-            InventoryFunctions.createOnInventoryEndsNotification(change.after, context),
-            InventoryFunctions.createShoppingListItem(change.after, context),
+            Functions.general().deleteRelatedNotifications(change.before, context),
+            Functions.inventory().deleteRelatedShoppingListItems(change.before, context),
+            Functions.inventory().createOnInventoryEndsNotification(change.after, context),
+            Functions.inventory().createShoppingListItem(change.after, context),
         ])
     }
 

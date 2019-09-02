@@ -44,6 +44,7 @@ export class CaseToDoNotifBuilder extends NotificationBuilder {
     }
 
     buildPlanedDateToDispatch(): void {
+        if (this.caseToDo.nextRepetitionDate === undefined) return;
         const dateToDispatch = this.caseToDo.nextRepetitionDate.toMillis() - 24 * 3600 * 1000;
         this.notification.plannedDateOfDispatch = Timestamp.fromMillis(dateToDispatch);
     }

@@ -1,10 +1,10 @@
-import {GeneralFunctions} from "../firestore/GeneralFunctions";
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
 import {EventContext} from "firebase-functions";
+import {Functions} from "../firestore/Functions";
 
 export function onCaseToDoDeleteHandler(snapshot: DocumentSnapshot, context: EventContext) {
     return Promise.all([
-        GeneralFunctions.deleteRelatedNotifications(snapshot, context),
-        GeneralFunctions.deleteRelatedPhotos(snapshot, context)
+        Functions.general().deleteRelatedNotifications(snapshot, context),
+        Functions.general().deleteRelatedPhotos(snapshot, context)
     ]);
 }
