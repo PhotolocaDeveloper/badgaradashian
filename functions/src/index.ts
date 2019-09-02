@@ -9,6 +9,7 @@ import {
     onInventoryDeleteHandler,
     onInventoryUpdateHandler,
     onPhotoDeleteHandler,
+    onShoppingListDeleteHandler,
     onShoppingListItemCreateHandler,
     onShoppingListItemDeleteHandler,
     onShoppingListItemUpdateHandler,
@@ -68,3 +69,7 @@ export const onShoppingListItemDUpdate = functions.firestore
 export const onShoppingListItemPhotosDelete = functions.firestore
     .document(FirestoreCollection.Buys + "/{id}/" + FirestoreCollection.Photos + "/{id}")
     .onDelete(onPhotoDeleteHandler);
+
+export const onShoppingListDelete = functions.firestore
+    .document(FirestoreCollection.BuyLists + "/{id}")
+    .onDelete(onShoppingListDeleteHandler);

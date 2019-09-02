@@ -6,8 +6,22 @@ import * as admin from "firebase-admin";
 import {FirestoreCollection} from "../../enums/FirestoreCollection";
 import {ShoppingListItem} from "../../classses/model/ShoppingListItem";
 import {NBNeedToBuyObject} from "../../classses/builders/notifications/NBNeedToBuyObject";
+import {Helper} from "../../classses/helpers/Helper";
 
 export class ShoppingFunctions {
+
+    /**
+     * Удаляет все связанные со списком покупок покупки
+     * @param snapshot
+     * @param context
+     */
+    deleteAllShoppingListItemFromList(snapshot: DocumentSnapshot, context: EventContext): Promise<any> {
+        return admin.firestore()
+            .collection(FirestoreCollection.Buys)
+            .where("list", "==", snapshot.ref)
+            .get()
+            .then(Helper.firestore().deleteAllFilesInQuery)
+    }
 
     /***
      * Добавляет уведомление о необходисости покупки товара
