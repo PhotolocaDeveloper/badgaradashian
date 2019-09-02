@@ -22,5 +22,6 @@ export class ShoppingListItemCreator {
         this.builder.buildUser();
         this.builder.buildDateToBuy();
         this.builder.buildDateCreated();
+        this.builder.buildRelatedObject();
     }
 }
