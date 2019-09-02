@@ -27,4 +27,6 @@ export namespace CaseToDoFunctions {
 
         return admin.firestore().collection(FirestoreCollection.Notifications).doc().create(serialize(notification));
     }
+
+
 }

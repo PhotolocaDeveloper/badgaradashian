@@ -42,21 +42,6 @@ export namespace InventoryFunctions {
             .then(FirestoreHelper.deleteAllFilesInQuery)
     }
 
-    /**
-     * Удаляет все связанные с инвентарём уведомления
-     * @param snapshot
-     * @param context
-     */
-    export function deleteRelatedNotifications(snapshot: DocumentSnapshot, context: EventContext): Promise<any> {
-        const inventoryLink = snapshot.ref;
-
-        return admin.firestore()
-            .collection(FirestoreCollection.Notifications)
-            .where("related_object", "==", inventoryLink)
-            .get()
-            .then(FirestoreHelper.deleteAllFilesInQuery)
-    }
-
     /***
      * Добавляет уведомление о замене инвентаря
      * @param snapshot
