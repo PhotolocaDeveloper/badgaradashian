@@ -2,6 +2,7 @@ import * as functions from 'firebase-functions';
 import * as admin from "firebase-admin";
 import {FirestoreCollection} from "./enums/FirestoreCollection";
 import {
+    onCaseToDoCreateHandler,
     onInventoryCreateHandler,
     onInventoryDeleteHandler,
     onInventoryUpdateHandler,
@@ -30,3 +31,7 @@ export const onInventoryUpdate = functions.firestore
 export const onInventoryPhotosDelete = functions.firestore
     .document(FirestoreCollection.Inventories + "/{id}/" + FirestoreCollection.Photos + "/{id}")
     .onDelete(onPhotoDeleteHandler);
+
+export const onCaseToDoCreate = functions.firestore
+    .document(FirestoreCollection.Tasks + "/{id}")
+    .onCreate(onCaseToDoCreateHandler);
