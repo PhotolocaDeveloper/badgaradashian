@@ -6,6 +6,7 @@ import {
     onCaseToDoDeleteHandler,
     onCaseToDoListDeleteHandler,
     onCaseToDoUpdateHandler,
+    onHousingDeleteHandler,
     onInventoryCreateHandler,
     onInventoryDeleteHandler,
     onInventoryUpdateHandler,
@@ -83,3 +84,7 @@ export const onShoppingListDelete = functions.firestore
 export const onRoomDelete = functions.firestore
     .document(FirestoreCollection.Rooms + "/{id}")
     .onDelete(onRoomDeleteHandler);
+
+export const onHousingDelete = functions.firestore
+    .document(FirestoreCollection.Housings + "/{id}")
+    .onDelete(onHousingDeleteHandler);

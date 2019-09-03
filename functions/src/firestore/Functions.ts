@@ -3,6 +3,7 @@ import {InventoryFunctions} from "./functions/InventoryFunctions";
 import {CaseToDoFunctions} from "./functions/CaseToDoFunctions";
 import {ShoppingFunctions} from "./functions/ShoppingFunctions";
 import {RoomFunctions} from "./functions/RoomFunctions";
+import {HousingFunctions} from "./functions/HousingFunctions";
 
 export class Functions {
 
@@ -11,6 +12,7 @@ export class Functions {
     private static caseToDoFunctions: CaseToDoFunctions;
     private static shoppingFunctions: ShoppingFunctions;
     private static roomFunctions: RoomFunctions;
+    private static housingFunctions: HousingFunctions;
 
     static general(): GeneralFunctions {
         if (!Functions.generalFunctions) {
@@ -45,5 +47,12 @@ export class Functions {
             Functions.roomFunctions = new RoomFunctions();
         }
         return Functions.roomFunctions;
+    }
+
+    static housing(): HousingFunctions {
+        if (!Functions.housingFunctions) {
+            Functions.housingFunctions = new HousingFunctions();
+        }
+        return Functions.housingFunctions;
     }
 }
