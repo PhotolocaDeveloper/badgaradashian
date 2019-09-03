@@ -24,6 +24,10 @@ export const onInventoryPhotosDelete = functions.firestore
     .document(FirestoreCollection.Inventories + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
     .onDelete(handlers.onPhotoDeleteHandler);
 
+export const onInventoryListDelete = functions.firestore
+    .document(FirestoreCollection.Inventories + "/{id}")
+    .onDelete(handlers.onInventoryListDeleteHandler);
+
 export const onCaseToDoCreate = functions.firestore
     .document(FirestoreCollection.Tasks + "/{id}")
     .onCreate(handlers.onCaseToDoCreateHandler);
@@ -68,6 +72,14 @@ export const onRoomDelete = functions.firestore
     .document(FirestoreCollection.Rooms + "/{id}")
     .onDelete(handlers.onRoomDeleteHandler);
 
+export const onRoomPhotosDelete = functions.firestore
+    .document(FirestoreCollection.Rooms + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
+    .onDelete(handlers.onPhotoDeleteHandler);
+
 export const onHousingDelete = functions.firestore
     .document(FirestoreCollection.Housings + "/{id}")
     .onDelete(handlers.onHousingDeleteHandler);
+
+export const onHousingPhotosDelete = functions.firestore
+    .document(FirestoreCollection.Housings + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
+    .onDelete(handlers.onPhotoDeleteHandler);

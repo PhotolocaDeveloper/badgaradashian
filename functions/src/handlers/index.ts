@@ -1,6 +1,7 @@
 export * from "./OnInventoryCreateHandler"
 export * from "./OnInventoryDeleteHandler"
 export * from "./OnInventoryUpdateHandler"
+export * from "./OnInventoryListDeleteHandler"
 export * from "./OnCaseToDoCreateHandler"
 export * from "./OnCaseToDoDeleteHandler"
 export * from "./OnCaseToDoUpdateHandler"

@@ -13,6 +13,19 @@ import {ShoppingListItemCreator} from "../../classses/creators/ShoppingListItemC
 import {Helper} from "../../classses/helpers/Helper";
 
 export class InventoryFunctions {
+
+    /**
+     * Удаляет весь инвентарь связанный со списком
+     * @param snapshot
+     */
+    deleteInventoryListItems(snapshot: DocumentSnapshot) {
+        return admin.firestore()
+            .collection(FirestoreCollection.InventoryLists)
+            .where("list", "==", snapshot.ref.id)
+            .get()
+            .then(Helper.firestore().deleteAllFilesInQuery)
+    }
+
     /**
      * Удаляет все связанные с инвентарём автосгененрированные покупки
      * @param snapshot
