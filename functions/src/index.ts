@@ -1,90 +1,73 @@
 import * as functions from 'firebase-functions';
 import * as admin from "firebase-admin";
+import * as handlers from "./handlers";
 import {FirestoreCollection} from "./enums/FirestoreCollection";
-import {
-    onCaseToDoCreateHandler,
-    onCaseToDoDeleteHandler,
-    onCaseToDoListDeleteHandler,
-    onCaseToDoUpdateHandler,
-    onHousingDeleteHandler,
-    onInventoryCreateHandler,
-    onInventoryDeleteHandler,
-    onInventoryUpdateHandler,
-    onPhotoDeleteHandler,
-    onRoomDeleteHandler,
-    onShoppingListDeleteHandler,
-    onShoppingListItemCreateHandler,
-    onShoppingListItemDeleteHandler,
-    onShoppingListItemUpdateHandler,
-    onUserCreateHandler,
-    onUserDeleteHandler
-} from "./handlers";
 
 admin.initializeApp();
 
-export const onUserCreate = functions.auth.user().onCreate(onUserCreateHandler);
-export const onUserDelete = functions.auth.user().onDelete(onUserDeleteHandler);
+export const onUserCreate = functions.auth.user().onCreate(handlers.onUserCreateHandler);
+export const onUserDelete = functions.auth.user().onDelete(handlers.onUserDeleteHandler);
 
 export const onInventoryCreate = functions.firestore
     .document(FirestoreCollection.Inventories + "/{id}")
-    .onCreate(onInventoryCreateHandler);
+    .onCreate(handlers.onInventoryCreateHandler);
 
 export const onInventoryDelete = functions.firestore
     .document(FirestoreCollection.Inventories + "/{id}")
-    .onDelete(onInventoryDeleteHandler);
+    .onDelete(handlers.onInventoryDeleteHandler);
 
 export const onInventoryUpdate = functions.firestore
     .document(FirestoreCollection.Inventories + "/{id}")
-    .onUpdate(onInventoryUpdateHandler);
+    .onUpdate(handlers.onInventoryUpdateHandler);
 
 export const onInventoryPhotosDelete = functions.firestore
     .document(FirestoreCollection.Inventories + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
-    .onDelete(onPhotoDeleteHandler);
+    .onDelete(handlers.onPhotoDeleteHandler);
 
 export const onCaseToDoCreate = functions.firestore
     .document(FirestoreCollection.Tasks + "/{id}")
-    .onCreate(onCaseToDoCreateHandler);
+    .onCreate(handlers.onCaseToDoCreateHandler);
 
 export const onCaseToDoDelete = functions.firestore
     .document(FirestoreCollection.Tasks + "/{id}")
-    .onDelete(onCaseToDoDeleteHandler);
+    .onDelete(handlers.onCaseToDoDeleteHandler);
 
 export const onCaseToDoUpdate = functions.firestore
     .document(FirestoreCollection.Tasks + "/{id}")
-    .onUpdate(onCaseToDoUpdateHandler);
+    .onUpdate(handlers.onCaseToDoUpdateHandler);
 
 export const onCaseToDoPhotosDelete = functions.firestore
     .document(FirestoreCollection.Tasks + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
-    .onDelete(onPhotoDeleteHandler);
+    .onDelete(handlers.onPhotoDeleteHandler);
 
 export const onCaseToDoListDelete = functions.firestore
     .document(FirestoreCollection.TaskLists + "/{id}")
-    .onDelete(onCaseToDoListDeleteHandler);
+    .onDelete(handlers.onCaseToDoListDeleteHandler);
 
 export const onShoppingListItemCreate = functions.firestore
     .document(FirestoreCollection.Buys + "/{id}")
-    .onCreate(onShoppingListItemCreateHandler);
+    .onCreate(handlers.onShoppingListItemCreateHandler);
 
 export const onShoppingListItemDelete = functions.firestore
     .document(FirestoreCollection.Buys + "/{id}")
-    .onDelete(onShoppingListItemDeleteHandler);
+    .onDelete(handlers.onShoppingListItemDeleteHandler);
 
 export const onShoppingListItemDUpdate = functions.firestore
     .document(FirestoreCollection.Buys + "/{id}")
-    .onUpdate(onShoppingListItemUpdateHandler);
+    .onUpdate(handlers.onShoppingListItemUpdateHandler);
 
 export const onShoppingListItemPhotosDelete = functions.firestore
     .document(FirestoreCollection.Buys + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
-    .onDelete(onPhotoDeleteHandler);
+    .onDelete(handlers.onPhotoDeleteHandler);
 
 export const onShoppingListDelete = functions.firestore
     .document(FirestoreCollection.BuyLists + "/{id}")
-    .onDelete(onShoppingListDeleteHandler);
+    .onDelete(handlers.onShoppingListDeleteHandler);
 
 export const onRoomDelete = functions.firestore
     .document(FirestoreCollection.Rooms + "/{id}")
-    .onDelete(onRoomDeleteHandler);
+    .onDelete(handlers.onRoomDeleteHandler);
 
 export const onHousingDelete = functions.firestore
     .document(FirestoreCollection.Housings + "/{id}")
-    .onDelete(onHousingDeleteHandler);
+    .onDelete(handlers.onHousingDeleteHandler);
