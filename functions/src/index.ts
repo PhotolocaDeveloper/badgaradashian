@@ -4,6 +4,7 @@ import {FirestoreCollection} from "./enums/FirestoreCollection";
 import {
     onCaseToDoCreateHandler,
     onCaseToDoDeleteHandler,
+    onCaseToDoListDeleteHandler,
     onCaseToDoUpdateHandler,
     onInventoryCreateHandler,
     onInventoryDeleteHandler,
@@ -35,7 +36,7 @@ export const onInventoryUpdate = functions.firestore
     .onUpdate(onInventoryUpdateHandler);
 
 export const onInventoryPhotosDelete = functions.firestore
-    .document(FirestoreCollection.Inventories + "/{id}/" + FirestoreCollection.Photos + "/{id}")
+    .document(FirestoreCollection.Inventories + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
     .onDelete(onPhotoDeleteHandler);
 
 export const onCaseToDoCreate = functions.firestore
@@ -51,8 +52,12 @@ export const onCaseToDoUpdate = functions.firestore
     .onUpdate(onCaseToDoUpdateHandler);
 
 export const onCaseToDoPhotosDelete = functions.firestore
-    .document(FirestoreCollection.Tasks + "/{id}/" + FirestoreCollection.Photos + "/{id}")
+    .document(FirestoreCollection.Tasks + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
     .onDelete(onPhotoDeleteHandler);
+
+export const onCaseToDoListDelete = functions.firestore
+    .document(FirestoreCollection.TaskLists + "/{id}")
+    .onDelete(onCaseToDoListDeleteHandler);
 
 export const onShoppingListItemCreate = functions.firestore
     .document(FirestoreCollection.Buys + "/{id}")
@@ -67,7 +72,7 @@ export const onShoppingListItemDUpdate = functions.firestore
     .onUpdate(onShoppingListItemUpdateHandler);
 
 export const onShoppingListItemPhotosDelete = functions.firestore
-    .document(FirestoreCollection.Buys + "/{id}/" + FirestoreCollection.Photos + "/{id}")
+    .document(FirestoreCollection.Buys + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
     .onDelete(onPhotoDeleteHandler);
 
 export const onShoppingListDelete = functions.firestore

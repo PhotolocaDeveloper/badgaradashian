@@ -6,8 +6,17 @@ import {CaseToDoNotifBuilder} from "../../classses/builders/notifications/CaseTo
 import {NotificationCreator} from "../../classses/creators/NotificationCreator";
 import * as admin from "firebase-admin";
 import {FirestoreCollection} from "../../enums/FirestoreCollection";
+import {Helper} from "../../classses/helpers/Helper";
 
 export class CaseToDoFunctions {
+
+    deleteToDoCasesInList(snapshot: DocumentSnapshot) {
+        return admin.firestore()
+            .collection(FirestoreCollection.Tasks)
+            .where("list", "==", snapshot.ref.id)
+            .get()
+            .then(Helper.firestore().deleteAllFilesInQuery)
+    }
 
     /**
      * Создаёт уведомление о необходимости выоплнить запланированное дело
