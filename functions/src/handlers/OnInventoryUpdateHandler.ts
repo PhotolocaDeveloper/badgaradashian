@@ -9,18 +9,18 @@ import {Functions} from "../firestore/Functions";
  * @param change
  * @param context
  */
-export function onInventoryUpdateHandler(change: Change<DocumentSnapshot>, context: EventContext): Promise<any> | undefined {
+export function onInventoryUpdateHandler(change: Change<DocumentSnapshot>, context: EventContext): Promise<any> {
     const inventoryBefore = deserialize(change.before.data(), Inventory);
     const inventoryAfter = deserialize(change.after.data(), Inventory);
 
     if (inventoryAfter.nextReplacementDate !== inventoryBefore.nextReplacementDate) {
         return Promise.all([
-            Functions.general().deleteRelatedNotifications(change.before, context),
-            Functions.inventory().deleteRelatedShoppingListItems(change.before, context),
-            Functions.inventory().createOnInventoryEndsNotification(change.after, context),
-            Functions.inventory().createShoppingListItem(change.after, context),
+            Functions.general().deleteRelatedNotifications(change.before),
+            Functions.inventory().deleteRelatedShoppingListItems(change.before),
+            Functions.inventory().createOnInventoryEndsNotification(change.after),
+            Functions.inventory().createShoppingListItem(change.after),
         ])
     }
 
-    return undefined
+    return Promise.resolve()
 }

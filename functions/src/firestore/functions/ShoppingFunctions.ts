@@ -1,5 +1,4 @@
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
-import {EventContext} from "firebase-functions";
 import {deserialize, serialize} from "typescript-json-serializer";
 import {NotificationCreator} from "../../classses/creators/NotificationCreator";
 import * as admin from "firebase-admin";
@@ -13,9 +12,8 @@ export class ShoppingFunctions {
     /**
      * Удаляет все связанные со списком покупок покупки
      * @param snapshot
-     * @param context
      */
-    deleteAllShoppingListItemFromList(snapshot: DocumentSnapshot, context: EventContext): Promise<any> {
+    deleteAllShoppingListItemFromList(snapshot: DocumentSnapshot): Promise<any> {
         return admin.firestore()
             .collection(FirestoreCollection.Buys)
             .where("list", "==", snapshot.ref)
@@ -26,16 +24,13 @@ export class ShoppingFunctions {
     /***
      * Добавляет уведомление о необходисости покупки товара
      * @param snapshot
-     * @param context
      */
-    createOnShoppingListItemNeedToBuy(snapshot: DocumentSnapshot, context: EventContext): Promise<any> | undefined {
-        if (context.auth === undefined) return undefined;
-
+    createOnShoppingListItemNeedToBuy(snapshot: DocumentSnapshot): Promise<any> | undefined {
         const shoppingListItem = deserialize(snapshot.data(), ShoppingListItem);
-        const uid = context.auth.uid;
+        const uid = shoppingListItem.user.id;
 
         if (shoppingListItem.dateToBuy === undefined) {
-            return undefined;
+            return;
         }
 
         const notificationBuilder = new NBNeedToBuyObject(uid, snapshot.ref, shoppingListItem);

@@ -12,7 +12,7 @@ export class RoomFunctions {
     deleteInventoryLists(snapshot: DocumentSnapshot) {
         return admin.firestore()
             .collection(FirestoreCollection.InventoryLists)
-            .where("room", "==", snapshot.ref.id)
+            .where("room", "==", snapshot.ref)
             .get()
             .then(Helper.firestore().deleteAllFilesInQuery)
     }

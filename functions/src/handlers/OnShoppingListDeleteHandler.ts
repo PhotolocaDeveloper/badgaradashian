@@ -1,9 +1,8 @@
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
-import {EventContext} from "firebase-functions";
 import {Functions} from "../firestore/Functions";
 
-export function onShoppingListDeleteHandler(snapshot: DocumentSnapshot, context: EventContext) {
+export function onShoppingListDeleteHandler(snapshot: DocumentSnapshot) {
     return Promise.all([
-        Functions.shopping().deleteAllShoppingListItemFromList(snapshot, context)
+        Functions.shopping().deleteAllShoppingListItemFromList(snapshot)
     ])
 }

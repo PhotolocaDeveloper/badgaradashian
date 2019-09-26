@@ -1,5 +1,4 @@
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
-import {EventContext} from "firebase-functions";
 import {deserialize, serialize} from "typescript-json-serializer";
 import {CaseToDo} from "../../classses/model/CaseToDo";
 import {CaseToDoNotifBuilder} from "../../classses/builders/notifications/CaseToDoNotifBuilder";
@@ -13,7 +12,7 @@ export class CaseToDoFunctions {
     deleteToDoCasesInList(snapshot: DocumentSnapshot) {
         return admin.firestore()
             .collection(FirestoreCollection.Tasks)
-            .where("list", "==", snapshot.ref.id)
+            .where("list", "==", snapshot.ref)
             .get()
             .then(Helper.firestore().deleteAllFilesInQuery)
     }
@@ -21,13 +20,10 @@ export class CaseToDoFunctions {
     /**
      * Создаёт уведомление о необходимости выоплнить запланированное дело
      * @param snapshot
-     * @param context
      */
-    createOnToDoCaseNotification(snapshot: DocumentSnapshot, context: EventContext): Promise<any> | undefined {
-        if (context.auth === undefined) return;
-
+    createOnToDoCaseNotification(snapshot: DocumentSnapshot): Promise<any> | undefined {
         const caseToDo = deserialize(snapshot.data(), CaseToDo);
-        const uid = context.auth.uid;
+        const uid = caseToDo.user.id;
 
         const notificationBuilder = new CaseToDoNotifBuilder(uid, snapshot.ref, caseToDo);
         const notificationCreator = new NotificationCreator(notificationBuilder);

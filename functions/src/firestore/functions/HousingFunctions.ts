@@ -12,7 +12,7 @@ export class HousingFunctions {
     deleteRooms(snapshot: DocumentSnapshot) {
         return admin.firestore()
             .collection(FirestoreCollection.Rooms)
-            .where("object", "==", snapshot.ref.id)
+            .where("object", "==", snapshot.ref)
             .get()
             .then(Helper.firestore().deleteAllFilesInQuery)
     }

@@ -1,10 +1,9 @@
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
 import {Functions} from "../firestore/Functions";
-import {EventContext} from "firebase-functions";
 
-export function onRoomDeleteHandler(snapshot: DocumentSnapshot, context: EventContext) {
+export function onRoomDeleteHandler(snapshot: DocumentSnapshot) {
     return Promise.all([
-        Functions.general().deleteRelatedPhotos(snapshot, context),
+        Functions.general().deleteRelatedPhotos(snapshot),
         Functions.room().deleteInventoryLists(snapshot)
     ])
 }
