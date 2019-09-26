@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from "firebase-admin";
 import * as handlers from "./handlers";
+import * as schedule from "./scheduleFunctions"
 import {FirestoreCollection} from "./enums/FirestoreCollection";
 
 admin.initializeApp();
@@ -83,3 +84,7 @@ export const onHousingDelete = functions.firestore
 export const onHousingPhotosDelete = functions.firestore
     .document(FirestoreCollection.Housings + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
     .onDelete(handlers.onPhotoDeleteHandler);
+
+export const sendingMessages = functions.pubsub
+    .schedule('every 1 minutes')
+    .onRun(schedule.sendingMessageScheduleFunction);
