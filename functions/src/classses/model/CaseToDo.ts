@@ -17,5 +17,5 @@ export class CaseToDo {
     @JsonProperty('last_repetition_date') lastRepetitionDate?: Timestamp;
     @JsonProperty('next_repetition_date') nextRepetitionDate?: Timestamp;
     @JsonProperty('date_created') dateCreated?: Timestamp;
-    @JsonProperty() user?: DocumentReference;
+    @JsonProperty() user!: DocumentReference;
 }

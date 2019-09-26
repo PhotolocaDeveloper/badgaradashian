@@ -1,8 +1,7 @@
 import {JsonProperty, Serializable} from "typescript-json-serializer";
 import * as admin from "firebase-admin";
-
-import Firestore = admin.firestore;
 import {TimeInterval} from "../../enums/TimeInterval";
+import Firestore = admin.firestore;
 
 @Serializable()
 export class Inventory {
@@ -10,6 +9,7 @@ export class Inventory {
         @JsonProperty() public name: string,
         @JsonProperty() public description: string,
         @JsonProperty() public count: number,
+        @JsonProperty() public user: Firestore.DocumentReference,
         @JsonProperty('inventory_list') public inventoryList: Firestore.DocumentReference,
         @JsonProperty('replacement_frequency_time_interval') public replacementFrequencyTimeInterval: TimeInterval,
         @JsonProperty('replacement_frequency_multiplier') public replacementFrequencyMultiplier: number,
