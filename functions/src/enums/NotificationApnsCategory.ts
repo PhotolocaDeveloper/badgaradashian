@@ -1,5 +1,5 @@
 export enum NotificationApnsCategory {
-    InventoryEnds = "InventoryEndsCategory",
-    CaseNeedToDo = "CaseNeedToDoCategory",
-    ShoppingListItemNeedToBuy = "ShoppingListItemNeedToBuyCategory"
+    InventoryEnds = "CATEGORY_INVENTORY_ENDS",
+    CaseNeedToDo = "CATEGORY_CASE_TO_DO",
+    ShoppingListItemNeedToBuy = "CATEGORY_SHOPPING_LIST_ITEM_NEED_TO_BUY"
 }
