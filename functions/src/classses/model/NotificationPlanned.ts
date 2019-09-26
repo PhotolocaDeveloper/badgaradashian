@@ -1,44 +1,43 @@
 import {JsonProperty, Serializable} from "typescript-json-serializer";
 import * as admin from "firebase-admin";
-
-import Firestore = admin.firestore;
 import {AppEvent} from "../../enums/AppEvent";
 import {NotificationType} from "../../enums/NotificationType";
+import Firestore = admin.firestore;
 
 @Serializable()
 export class NotificationPlanned {
 
     @JsonProperty()
-    recipient: string | null | Array<string> = null;
+    recipient?: string;
 
     @JsonProperty()
-    type: NotificationType | null = null;
+    type?: NotificationType;
 
     @JsonProperty('related_object')
-    relatedObject: Firestore.DocumentReference | null = null;
+    relatedObject?: Firestore.DocumentReference;
 
     @JsonProperty('notification_title')
-    notificationTitle: string | null = null;
+    notificationTitle?: string;
 
     @JsonProperty('notification_body')
-    notificationBody: string | null = null;
+    notificationBody?: string;
 
     @JsonProperty('notification_data')
-    notificationData: any | null = null;
+    notificationData?: any;
 
     @JsonProperty('android_click_action')
-    androidClickAction: string | null = null;
+    androidClickAction?: string;
 
     @JsonProperty('apns_category')
-    apnsCategory: string | null = null;
+    apnsCategory?: string;
 
     @JsonProperty('planned_date_of_dispatch')
-    plannedDateOfDispatch: Firestore.Timestamp | null = null;
+    plannedDateOfDispatch?: Firestore.Timestamp;
 
     @JsonProperty('resending_period')
-    resendingPeriod: number | null = null;
+    resendingPeriod?: number;
 
     @JsonProperty()
-    event: AppEvent | null = null;
+    event?: AppEvent;
 
 }

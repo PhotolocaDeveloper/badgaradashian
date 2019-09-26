@@ -12,7 +12,7 @@ export class ShoppingListItem {
 
     @JsonProperty() list?: admin.firestore.DocumentReference;
     @JsonProperty() housing?: admin.firestore.DocumentReference;
-    @JsonProperty() user?: admin.firestore.DocumentReference;
+    @JsonProperty() user!: admin.firestore.DocumentReference;
     @JsonProperty('related_object') relatedObject?: admin.firestore.DocumentReference;
 
     @JsonProperty('date_to_buy') dateToBuy?: admin.firestore.Timestamp;

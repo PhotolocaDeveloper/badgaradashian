@@ -58,7 +58,7 @@ export class CaseToDoNotifBuilder extends NotificationBuilder {
     }
 
     buildResendingPeriod(): void {
-        this.notification.resendingPeriod = null
+        this.notification.resendingPeriod = undefined
     }
 
     buildType(): void {

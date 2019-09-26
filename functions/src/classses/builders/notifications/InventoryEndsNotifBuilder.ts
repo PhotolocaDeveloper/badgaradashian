@@ -63,7 +63,7 @@ export class InventoryEndsNotifBuilder extends NotificationBuilder {
     }
 
     buildResendingPeriod(): void {
-        this.notification.resendingPeriod = null
+        this.notification.resendingPeriod = undefined
     }
 
 }
