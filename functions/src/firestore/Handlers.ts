@@ -1,0 +1,21 @@
+import {RoomHandlers} from "./handlers/RoomHandlers";
+import {HousingHandlers} from "./handlers/HousingHandlers";
+import {TaskHandler} from "./handlers/TaskHandler";
+import {ShoppingListItemHandlers} from "./handlers/ShoppingListItemHandlers";
+import {InventoryHandlers} from "./handlers/InventoryHandlers";
+import {InventoryListHandlers} from "./handlers/InventoryListHandlers";
+import {TaskListHandlers} from "./handlers/TaskListHandlers";
+import {PhotoHandlers} from "./handlers/PhotoHandlers";
+import {ShoppingListHandlers} from "./handlers/ShoppingListHandlers";
+import {UserHandlers} from "./handlers/UserHandlers";
+
+export const room: RoomHandlers = new RoomHandlers();
+export const housing: HousingHandlers = new HousingHandlers();
+export const task: TaskHandler = new TaskHandler();
+export const taskList: TaskListHandlers = new TaskListHandlers();
+export const shoppingListItem: ShoppingListItemHandlers = new ShoppingListItemHandlers();
+export const shoppingList: ShoppingListHandlers = new ShoppingListHandlers();
+export const inventory: InventoryHandlers = new InventoryHandlers();
+export const inventoryList: InventoryListHandlers = new InventoryListHandlers();
+export const photo: PhotoHandlers = new PhotoHandlers();
+export const user: UserHandlers = new UserHandlers();

@@ -10,6 +10,41 @@ import {Helper} from "../../classses/helpers/Helper";
 export class ShoppingFunctions {
 
     /**
+     * Изменяет количество элементов списка покупок в связанных списках
+     * @param before
+     * @param after
+     */
+    updateShoppingListItemInListCount(before: DocumentSnapshot, after: DocumentSnapshot) {
+        const itemBefore = deserialize(before.data(), ShoppingListItem);
+        const itemAfter = deserialize(after.data(), ShoppingListItem);
+        if (itemBefore.list === itemAfter.list) return Promise.resolve();
+        return Promise.all([
+            this.decrementShoppingItemsInListCount(before),
+            this.incrementShoppingItemsInListCount(after)
+        ])
+    }
+
+    /**
+     * Увеличивает счетчик количества покупок в списке на 1
+     * @param snapshot
+     */
+    incrementShoppingItemsInListCount(snapshot: DocumentSnapshot) {
+        const item = deserialize(snapshot.data(), ShoppingListItem);
+        if (item.list === undefined) return Promise.resolve();
+        return Helper.firestore().incrementField(item.list, "items_count")
+    }
+
+    /**
+     * Уменьшает счетчик количества покупок в списке на 1
+     * @param snapshot
+     */
+    decrementShoppingItemsInListCount(snapshot: DocumentSnapshot) {
+        const item = deserialize(snapshot.data(), ShoppingListItem);
+        if (item.list === undefined) return Promise.resolve();
+        return Helper.firestore().decrementField(item.list, "items_count")
+    }
+
+    /**
      * Удаляет все связанные со списком покупок покупки
      * @param snapshot
      */
@@ -25,12 +60,12 @@ export class ShoppingFunctions {
      * Добавляет уведомление о необходисости покупки товара
      * @param snapshot
      */
-    createOnShoppingListItemNeedToBuy(snapshot: DocumentSnapshot): Promise<any> | undefined {
+    createOnShoppingListItemNeedToBuy(snapshot: DocumentSnapshot): Promise<any> {
         const shoppingListItem = deserialize(snapshot.data(), ShoppingListItem);
         const uid = shoppingListItem.user.id;
 
         if (shoppingListItem.dateToBuy === undefined) {
-            return;
+            return Promise.resolve();
         }
 
         const notificationBuilder = new NBNeedToBuyObject(uid, snapshot.ref, shoppingListItem);

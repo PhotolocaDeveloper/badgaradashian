@@ -13,16 +13,115 @@ import {Helper} from "../../classses/helpers/Helper";
 
 export class InventoryFunctions {
 
+    /** Изменение количиства инвентаря в связанных комнатах **/
+
     /**
-     * Удаляет весь инвентарь связанный со списком
+     * Изменяет количество инвентаря в связанных комнатах
+     * @param before
+     * @param after
+     */
+    updateInventoryInRoomCount(before: DocumentSnapshot, after: DocumentSnapshot) {
+        const itemBefore = deserialize(before.data(), Inventory);
+        const itemAfter = deserialize(after.data(), Inventory);
+        if (itemBefore.room === itemAfter.room) return Promise.resolve();
+        return Promise.all([
+            this.decrementInventoryInHousingCount(before),
+            this.incrementInventoryInHousingCount(after)
+        ])
+    }
+
+    /**
+     * Увеличивает счетчик количества инвентаря в комнате на 1
      * @param snapshot
      */
-    deleteInventoryListItems(snapshot: DocumentSnapshot) {
-        return admin.firestore()
-            .collection(FirestoreCollection.InventoryLists)
-            .where("list", "==", snapshot.ref)
-            .get()
-            .then(Helper.firestore().deleteAllFilesInQuery)
+    incrementInventoryInRoomCount(snapshot: DocumentSnapshot) {
+        const item = deserialize(snapshot.data(), Inventory);
+        if (item.room === undefined) return Promise.resolve();
+        return Helper.firestore().incrementField(item.room, "inventories_count")
+    }
+
+    /**
+     * Уменьшает счетчик количества инвентаря в комнате на 1
+     * @param snapshot
+     */
+    decrementInventoryInRoomCount(snapshot: DocumentSnapshot) {
+        const item = deserialize(snapshot.data(), Inventory);
+        if (item.room === undefined) return Promise.resolve();
+        return Helper.firestore().decrementField(item.room, "inventories_count")
+    }
+
+    /** Изменение количиства инвентаря в связанных объектах **/
+
+    /**
+     * Обновляет счетчик количества инветаря в связванных объектах
+     * @param before
+     * @param after
+     */
+    updateInventoryInHousingCount(before: DocumentSnapshot, after: DocumentSnapshot) {
+        const itemBefore = deserialize(before.data(), Inventory);
+        const itemAfter = deserialize(after.data(), Inventory);
+        if (itemBefore.housing === itemAfter.housing) return Promise.resolve();
+        return Promise.all([
+            this.decrementInventoryInHousingCount(before),
+            this.incrementInventoryInHousingCount(after)
+        ])
+    }
+
+    /**
+     * Увеличивает счетчик количества инвентаря в объекте на 1
+     * @param snapshot
+     */
+    incrementInventoryInHousingCount(snapshot: DocumentSnapshot) {
+        const item = deserialize(snapshot.data(), Inventory);
+        if (item.housing === undefined) return Promise.resolve();
+        return Helper.firestore().incrementField(item.housing, "inventories_count")
+    }
+
+    /**
+     * Уменьшает счетчик количества инвентаря в объекте на 1
+     * @param snapshot
+     */
+    decrementInventoryInHousingCount(snapshot: DocumentSnapshot) {
+        const item = deserialize(snapshot.data(), Inventory);
+        if (item.housing === undefined) return Promise.resolve();
+        return Helper.firestore().decrementField(item.housing, "inventories_count")
+    }
+
+    /** Изменение количиства инвентаря в связанных списках **/
+
+    /**
+     * Обновляет счетчик количества инветаря в связванных списках
+     * @param before
+     * @param after
+     */
+    updateInventoryInListCount(before: DocumentSnapshot, after: DocumentSnapshot) {
+        const itemBefore = deserialize(before.data(), Inventory);
+        const itemAfter = deserialize(after.data(), Inventory);
+        if (itemBefore.inventoryList === itemAfter.inventoryList) return Promise.resolve();
+        return Promise.all([
+            this.decrementInventoryInListCount(before),
+            this.incrementInventoryInListCount(after)
+        ])
+    }
+
+    /**
+     * Увеличивает счетчик количества инвентаря в списке на 1
+     * @param snapshot
+     */
+    incrementInventoryInListCount(snapshot: DocumentSnapshot) {
+        const item = deserialize(snapshot.data(), Inventory);
+        if (item.inventoryList === undefined) return Promise.resolve();
+        return Helper.firestore().incrementField(item.inventoryList, "inventories_count")
+    }
+
+    /**
+     * Уменьшает счетчик количества инвентаря в списке на 1
+     * @param snapshot
+     */
+    decrementInventoryInListCount(snapshot: DocumentSnapshot) {
+        const item = deserialize(snapshot.data(), Inventory);
+        if (item.inventoryList === undefined) return Promise.resolve();
+        return Helper.firestore().decrementField(item.inventoryList, "inventories_count")
     }
 
     /**
@@ -55,12 +154,12 @@ export class InventoryFunctions {
      * Добавляет уведомление о замене инвентаря
      * @param snapshot
      */
-    createOnInventoryEndsNotification(snapshot: DocumentSnapshot): Promise<any> | undefined {
+    createOnInventoryEndsNotification(snapshot: DocumentSnapshot): Promise<any> {
         const inventory = deserialize(snapshot.data(), Inventory);
         const uid = inventory.user.id;
 
         if (inventory.nextReplacementDate === undefined) {
-            return;
+            return Promise.resolve();
         }
 
         const notificationBuilder = new InventoryEndsNotifBuilder(uid, snapshot.ref, inventory);
@@ -75,12 +174,12 @@ export class InventoryFunctions {
      * Добавляет покупку если установленна дата замены
      * @param snapshot
      */
-    createShoppingListItem(snapshot: DocumentSnapshot): Promise<any> | undefined {
+    createShoppingListItem(snapshot: DocumentSnapshot): Promise<any> {
         const inventory = deserialize(snapshot.data(), Inventory);
         const uid = inventory.user.id;
 
         if (inventory.nextReplacementDate === undefined) {
-            return;
+            return Promise.resolve();
         }
 
         const userLink = admin.firestore().collection(FirestoreCollection.Users).doc(uid);

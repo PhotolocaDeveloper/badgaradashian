@@ -18,10 +18,80 @@ export class CaseToDoFunctions {
     }
 
     /**
+     * Изменяет количество задач в связанных объектах при изменении задачи
+     * @param before
+     * @param after
+     */
+    updateTaskInHouseCount(before: DocumentSnapshot, after: DocumentSnapshot) {
+        const itemBefore = deserialize(before.data(), CaseToDo);
+        const itemAfter = deserialize(after.data(), CaseToDo);
+        if (itemBefore.object === itemAfter.object) return Promise.resolve();
+        return Promise.all([
+            this.decrementTaskInHouseCount(before),
+            this.incrementTaskInHouseCount(after)
+        ])
+    }
+
+    /**
+     * Изменяет количество задач в связанных списках при изменении задачи
+     * @param before
+     * @param after
+     */
+    updateTaskInListCount(before: DocumentSnapshot, after: DocumentSnapshot) {
+        const itemBefore = deserialize(before.data(), CaseToDo);
+        const itemAfter = deserialize(after.data(), CaseToDo);
+        if (itemBefore.list === itemAfter.list) return Promise.resolve();
+        return Promise.all([
+            this.decrementTasksInListCount(before),
+            this.incrementTasksInListCount(after)
+        ])
+    }
+
+    /**
+     * Увеличивает счётчик количества задач в связанном объекте
+     * @param snapshot
+     */
+    incrementTaskInHouseCount(snapshot: DocumentSnapshot) {
+        const item = deserialize(snapshot.data(), CaseToDo);
+        if (item.object === undefined) return Promise.resolve();
+        return Helper.firestore().incrementField(item.object, "tasks_count")
+    }
+
+    /**
+     * Уменьшает счётчик количества задач в связанном объекте
+     * @param snapshot
+     */
+    decrementTaskInHouseCount(snapshot: DocumentSnapshot) {
+        const item = deserialize(snapshot.data(), CaseToDo);
+        if (item.object === undefined) return Promise.resolve();
+        return Helper.firestore().decrementField(item.object, "tasks_count")
+    }
+
+    /**
+     * Увеличивает счетчик количества задач в списке дел на 1
+     * @param snapshot
+     */
+    incrementTasksInListCount(snapshot: DocumentSnapshot) {
+        const taskItem = deserialize(snapshot.data(), CaseToDo);
+        if (taskItem.list === undefined) return Promise.resolve();
+        return Helper.firestore().incrementField(taskItem.list, "items_count")
+    }
+
+    /**
+     * Уменьшает счетчик количества задач в списке дел на 1
+     * @param snapshot
+     */
+    decrementTasksInListCount(snapshot: DocumentSnapshot) {
+        const taskItem = deserialize(snapshot.data(), CaseToDo);
+        if (taskItem.list === undefined) return Promise.resolve();
+        return Helper.firestore().decrementField(taskItem.list, "items_count")
+    }
+
+    /**
      * Создаёт уведомление о необходимости выоплнить запланированное дело
      * @param snapshot
      */
-    createOnToDoCaseNotification(snapshot: DocumentSnapshot): Promise<any> | undefined {
+    createOnToDoCaseNotification(snapshot: DocumentSnapshot): Promise<any> {
         const caseToDo = deserialize(snapshot.data(), CaseToDo);
         const uid = caseToDo.user.id;
 

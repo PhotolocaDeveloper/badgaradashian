@@ -8,7 +8,10 @@
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
-    "test": "npm run build && mocha --reporter spec"
+    "test": "npm run build && mocha --reporter spec",
+    "deploy-onTaskCreate": "firebase deploy --only functions:onCaseToDoCreate",
+    "deploy-onTaskDelete": "firebase deploy --only functions:onCaseToDoDelete",
+    "deploy-onTaskUpdate": "firebase deploy --only functions:onCaseToDoUpdate"
   },
   "engines": {
     "node": "8"

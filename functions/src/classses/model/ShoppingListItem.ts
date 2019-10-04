@@ -11,7 +11,7 @@ export class ShoppingListItem {
     @JsonProperty('is_done ') isDone?: boolean;
 
     @JsonProperty() list?: admin.firestore.DocumentReference;
-    @JsonProperty() housing?: admin.firestore.DocumentReference;
+    @JsonProperty('object') housing?: admin.firestore.DocumentReference;
     @JsonProperty() user!: admin.firestore.DocumentReference;
     @JsonProperty('related_object') relatedObject?: admin.firestore.DocumentReference;
 

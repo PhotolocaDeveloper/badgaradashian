@@ -43,7 +43,7 @@ export class MessagePlannedAdapter {
     }
 
     async buildMessages() {
-        if (this.messagePlanned.type == NotificationType.Personal) {
+        if (this.messagePlanned.type === NotificationType.Personal) {
             this._messages = await this.buildPersonalMessage(this.messagePlanned)
         } else {
             this._messages = [this.buildBroadcastMessage(this.messagePlanned)]

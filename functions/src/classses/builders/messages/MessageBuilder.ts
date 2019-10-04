@@ -66,7 +66,7 @@ export class MessageBuilder implements IMessageBuilder {
                     },
                     category: this.apnsCategory,
                     "content-available": 1
-                },
+                }
             }
         };
         return message;

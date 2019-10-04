@@ -4,11 +4,13 @@ import {CaseToDoFunctions} from "./functions/CaseToDoFunctions";
 import {ShoppingFunctions} from "./functions/ShoppingFunctions";
 import {RoomFunctions} from "./functions/RoomFunctions";
 import {HousingFunctions} from "./functions/HousingFunctions";
+import {InventoryListFunctions} from "./functions/InventoryListFunctions";
 
 export class Functions {
 
     private static generalFunctions: GeneralFunctions;
     private static inventoryFunctions: InventoryFunctions;
+    private static inventoryListFunctions: InventoryListFunctions;
     private static caseToDoFunctions: CaseToDoFunctions;
     private static shoppingFunctions: ShoppingFunctions;
     private static roomFunctions: RoomFunctions;
@@ -26,6 +28,13 @@ export class Functions {
             Functions.inventoryFunctions = new InventoryFunctions();
         }
         return Functions.inventoryFunctions;
+    }
+
+    static inventoryList(): InventoryListFunctions {
+        if (!Functions.inventoryListFunctions) {
+            Functions.inventoryListFunctions = new InventoryListFunctions();
+        }
+        return Functions.inventoryListFunctions;
     }
 
     static caseToDo(): CaseToDoFunctions {
