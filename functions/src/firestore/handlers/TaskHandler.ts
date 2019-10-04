@@ -28,7 +28,7 @@ export class TaskHandler {
 
         const promises: Promise<any>[] = [
             Functions.caseToDo().updateTaskInHouseCount(change.before, change.after),
-            Functions.caseToDo().updateTaskInListCount(change.before, change.after)
+            Functions.caseToDo().updateTaskInListCount(change.before, change.after),
         ];
 
         if (caseToDoAfter.nextRepetitionDate !== caseToDoBefore.nextRepetitionDate) {
@@ -39,5 +39,11 @@ export class TaskHandler {
         }
 
         return Promise.all(promises)
+    }
+
+    onWrite(change: Change<DocumentSnapshot>): Promise<any> {
+        return Promise.all([
+            Functions.caseToDo().updateTaskInListCollection(change)
+        ])
     }
 }

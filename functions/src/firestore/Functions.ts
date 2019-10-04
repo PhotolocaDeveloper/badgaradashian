@@ -5,6 +5,7 @@ import {ShoppingFunctions} from "./functions/ShoppingFunctions";
 import {RoomFunctions} from "./functions/RoomFunctions";
 import {HousingFunctions} from "./functions/HousingFunctions";
 import {InventoryListFunctions} from "./functions/InventoryListFunctions";
+import {TaskListFunctions} from "./functions/TaskListFunctions";
 
 export class Functions {
 
@@ -12,6 +13,7 @@ export class Functions {
     private static inventoryFunctions: InventoryFunctions;
     private static inventoryListFunctions: InventoryListFunctions;
     private static caseToDoFunctions: CaseToDoFunctions;
+    private static taskListFunctions: TaskListFunctions;
     private static shoppingFunctions: ShoppingFunctions;
     private static roomFunctions: RoomFunctions;
     private static housingFunctions: HousingFunctions;
@@ -42,6 +44,13 @@ export class Functions {
             Functions.caseToDoFunctions = new CaseToDoFunctions();
         }
         return Functions.caseToDoFunctions;
+    }
+
+    static taskList(): TaskListFunctions {
+        if (!Functions.taskListFunctions) {
+            Functions.taskListFunctions = new TaskListFunctions();
+        }
+        return Functions.taskListFunctions;
     }
 
     static shopping(): ShoppingFunctions {

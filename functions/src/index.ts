@@ -49,6 +49,14 @@ export const onCaseToDoUpdate = functions.firestore
     .document(FirestoreCollection.Tasks + "/{id}")
     .onUpdate(handlers.task.onUpdate);
 
+export const onCaseToDoWrite = functions.firestore
+    .document(FirestoreCollection.Tasks + "/{id}")
+    .onWrite(handlers.task.onWrite);
+
+export const onLocalTaskItemWrite = functions.firestore
+    .document(FirestoreCollection.TaskLists + "/{id}/" + FirestoreCollection.Tasks + "/{task_id}")
+    .onWrite(handlers.taskListItem.onWrite);
+
 export const onCaseToDoPhotosDelete = functions.firestore
     .document(FirestoreCollection.Tasks + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
     .onDelete(handlers.photo.onDelete);

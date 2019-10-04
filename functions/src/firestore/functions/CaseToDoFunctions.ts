@@ -6,15 +6,53 @@ import {NotificationCreator} from "../../classses/creators/NotificationCreator";
 import * as admin from "firebase-admin";
 import {FirestoreCollection} from "../../enums/FirestoreCollection";
 import {Helper} from "../../classses/helpers/Helper";
+import {Change} from "firebase-functions";
 
 export class CaseToDoFunctions {
 
-    deleteToDoCasesInList(snapshot: DocumentSnapshot) {
-        return admin.firestore()
-            .collection(FirestoreCollection.Tasks)
-            .where("list", "==", snapshot.ref)
-            .get()
-            .then(Helper.firestore().deleteAllFilesInQuery)
+    createTaskInListCollection(snapshot: DocumentSnapshot): Promise<any> {
+        if (snapshot === null || !snapshot.exists) return Promise.resolve();
+        const taskItem = deserialize(snapshot.data(), CaseToDo);
+        if (!taskItem.list) return Promise.resolve();
+        return taskItem.list.collection(FirestoreCollection.Tasks).doc(snapshot.id).set(snapshot.data()!)
+    }
+
+    deleteTaskInListCollection(snapshot: DocumentSnapshot): Promise<any> {
+        if (snapshot === null || !snapshot.exists) return Promise.resolve();
+        const taskItem = deserialize(snapshot.data(), CaseToDo);
+        if (!taskItem.list) return Promise.resolve();
+        return taskItem.list.collection(FirestoreCollection.Tasks).doc(snapshot.id).delete()
+    }
+
+    updateTaskInListCollection(change: Change<DocumentSnapshot>): Promise<any> {
+        return Promise.all([
+            this.deleteTaskInListCollection(change.before),
+            this.createTaskInListCollection(change.after)
+        ]);
+    }
+
+    async updateDateToDoInList(snapshot: DocumentSnapshot) {
+        if (!snapshot || !snapshot.exists) return Promise.resolve("Snapshot is missing");
+
+        const tasksCollection = snapshot.ref.parent;
+        const taskListRef = tasksCollection.parent;
+
+        if (!taskListRef) return Promise.resolve("List don't exist");
+
+        const querySnapshot = await tasksCollection
+            .orderBy("date_to_do", "desc")
+            .limit(1)
+            .get();
+
+        let newDate = undefined;
+        const firstItem = querySnapshot.docs.pop();
+
+        if (firstItem) {
+            const task = deserialize(firstItem.data(), CaseToDo);
+            newDate = task.dateToDo
+        }
+
+        return taskListRef.update({"date_to_do": newDate})
     }
 
     /**
