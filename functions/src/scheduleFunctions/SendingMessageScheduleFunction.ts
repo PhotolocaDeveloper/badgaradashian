@@ -48,10 +48,9 @@ function setMessagingSettings(settings: MessageSetting) {
 }
 
 function cleanNotification(settings: MessageSetting) {
-    return admin.firestore().collection(FirestoreCollection.Notifications)
-        .where('planned_date_of_dispatch', '<', settings.lastSuccessfullySendTime)
-        .get()
-        .then(Helper.firestore().deleteAllFilesInQuery)
+    const query = admin.firestore().collection(FirestoreCollection.Notifications)
+        .where('planned_date_of_dispatch', '<', settings.lastSuccessfullySendTime);
+    return Helper.firestore().deleteAllFilesInQuery(query);
 }
 
 /**

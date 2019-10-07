@@ -6,11 +6,10 @@ import {Helper} from "../../classses/helpers/Helper";
 export class TaskListFunctions {
 
     deleteSubTasks(snapshot: DocumentSnapshot) {
-        return admin.firestore()
+        const query = admin.firestore()
             .collection(FirestoreCollection.Tasks)
-            .where("list", "==", snapshot.ref)
-            .get()
-            .then(Helper.firestore().deleteAllFilesInQuery)
+            .where("list", "==", snapshot.ref);
+        return Helper.firestore().deleteAllFilesInQuery(query)
     }
 
 }

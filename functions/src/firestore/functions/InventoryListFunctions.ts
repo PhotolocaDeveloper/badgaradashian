@@ -77,7 +77,7 @@ export class InventoryListFunctions {
     decrementInventoryListsInRoomCount(snapshot: DocumentSnapshot) {
         const item = deserialize(snapshot.data(), InventoryList);
         if (item.room === undefined) return Promise.resolve();
-        return Helper.firestore().decrementField(item.room, "inventory_lists_count")
+        return Helper.firestore().decrementField(item.room, "inventory_lists_count", item.inventoriesCount)
     }
 
     /** Изменение количиства списков инвентаря в связанных объектах **/
@@ -122,10 +122,9 @@ export class InventoryListFunctions {
      * @param snapshot
      */
     deleteInventoryListItems(snapshot: DocumentSnapshot) {
-        return admin.firestore()
+        const query = admin.firestore()
             .collection(FirestoreCollection.Inventories)
-            .where("inventory_list", "==", snapshot.ref)
-            .get()
-            .then(Helper.firestore().deleteAllFilesInQuery)
+            .where("inventory_list", "==", snapshot.ref);
+        return Helper.firestore().deleteAllFilesInQuery(query)
     }
 }

@@ -10,12 +10,10 @@ export class GeneralFunctions {
      */
     deleteRelatedNotifications(snapshot: DocumentSnapshot): Promise<any> {
         const ref = snapshot.ref;
-
-        return admin.firestore()
+        const query = admin.firestore()
             .collection(FirestoreCollection.Notifications)
-            .where("related_object", "==", ref)
-            .get()
-            .then(Helper.firestore().deleteAllFilesInQuery)
+            .where("related_object", "==", ref);
+        return Helper.firestore().deleteAllFilesInQuery(query);
     }
 
     /**
@@ -24,15 +22,7 @@ export class GeneralFunctions {
      */
     deleteRelatedPhotos(snapshot: DocumentSnapshot): Promise<any> {
         const photosCollection = snapshot.ref.collection(FirestoreCollection.Photos);
-        return photosCollection.get().then(Helper.firestore().deleteAllFilesInQuery)
-    }
-
-    /**
-     * Удаляет все документы в коллекции
-     * @param querySnapshot
-     */
-    deleteAllFilesInQuery(querySnapshot: admin.firestore.QuerySnapshot): Promise<any> {
-        return Promise.all(querySnapshot.docs.map(document => document.ref.delete()));
+        return Helper.firestore().deleteAllFilesInQuery(photosCollection);
     }
 
 }

@@ -2,8 +2,14 @@ import * as admin from "firebase-admin";
 
 export class FirestoreHelper {
 
-    deleteAllFilesInQuery(querySnapshot: admin.firestore.QuerySnapshot): Promise<any> {
-        return Promise.all(querySnapshot.docs.map(document => document.ref.delete()));
+    deleteAllFilesInQuery(query: admin.firestore.Query) {
+        return admin.firestore().runTransaction(transaction => {
+            return transaction.get(query).then(snapshots => {
+                snapshots.forEach(snapshot => {
+                    transaction.delete(snapshot.ref)
+                })
+            })
+        });
     }
 
     incrementFieldWithBatch(batch: admin.firestore.WriteBatch, documentReference: admin.firestore.DocumentReference, fieldPath: string, count?: number) {

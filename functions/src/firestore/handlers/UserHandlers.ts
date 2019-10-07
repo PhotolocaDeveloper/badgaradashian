@@ -80,11 +80,9 @@ export class UserHandlers {
 
     onDelete(userRecord: UserRecord): Promise<any> {
         const userId = userRecord.uid;
-
-        return admin.firestore()
+        const query = admin.firestore()
             .collection(FirestoreCollection.UserSettings)
-            .where("user_id", "==", userId)
-            .get()
-            .then(Helper.firestore().deleteAllFilesInQuery)
+            .where("user_id", "==", userId);
+        return Helper.firestore().deleteAllFilesInQuery(query);
     }
 }

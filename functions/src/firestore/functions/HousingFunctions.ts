@@ -10,10 +10,9 @@ export class HousingFunctions {
      * @param snapshot
      */
     deleteRooms(snapshot: DocumentSnapshot) {
-        return admin.firestore()
+        const query = admin.firestore()
             .collection(FirestoreCollection.Rooms)
-            .where("object", "==", snapshot.ref)
-            .get()
-            .then(Helper.firestore().deleteAllFilesInQuery)
+            .where("object", "==", snapshot.ref);
+        return Helper.firestore().deleteAllFilesInQuery(query);
     }
 }

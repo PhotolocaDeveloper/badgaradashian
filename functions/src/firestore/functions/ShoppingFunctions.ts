@@ -49,11 +49,10 @@ export class ShoppingFunctions {
      * @param snapshot
      */
     deleteAllShoppingListItemFromList(snapshot: DocumentSnapshot): Promise<any> {
-        return admin.firestore()
+        const query = admin.firestore()
             .collection(FirestoreCollection.Buys)
-            .where("list", "==", snapshot.ref)
-            .get()
-            .then(Helper.firestore().deleteAllFilesInQuery)
+            .where("list", "==", snapshot.ref);
+        return Helper.firestore().deleteAllFilesInQuery(query);
     }
 
     /***
