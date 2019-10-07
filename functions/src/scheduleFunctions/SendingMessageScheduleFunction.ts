@@ -32,8 +32,8 @@ export async function sendingMessageScheduleFunction() {
  */
 async function getMessageSettings(): Promise<MessageSetting> {
     return await admin.firestore()
-        .collection(FirestoreCollection.Notifications)
-        .doc("settings")
+        .collection(FirestoreCollection.SERVICES)
+        .doc("notifications")
         .get()
         .then(snapshot => {
             return deserialize(snapshot.data(), MessageSetting)

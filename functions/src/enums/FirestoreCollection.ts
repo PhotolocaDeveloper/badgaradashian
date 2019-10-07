@@ -10,5 +10,6 @@ export enum FirestoreCollection {
     Tasks = 'tasks',
     TaskLists = 'tasks_lists',
     Notifications = 'notifications',
-    Photos = 'photos'
+    Photos = 'photos',
+    SERVICES = "service"
 }
