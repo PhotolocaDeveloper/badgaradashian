@@ -6,6 +6,18 @@ export class FirestoreHelper {
         return Promise.all(querySnapshot.docs.map(document => document.ref.delete()));
     }
 
+    incrementFieldWithBatch(batch: admin.firestore.WriteBatch, documentReference: admin.firestore.DocumentReference, fieldPath: string, count?: number) {
+        const incrementCount = count || 1;
+        const increment = admin.firestore.FieldValue.increment(incrementCount);
+        batch.update(documentReference, fieldPath, increment);
+    }
+
+    decrementFieldWithBatch(batch: admin.firestore.WriteBatch, documentReference: admin.firestore.DocumentReference, fieldPath: string, count?: number) {
+        const decCount = count || 1;
+        const decrement = admin.firestore.FieldValue.increment(-decCount);
+        batch.update(documentReference, fieldPath, decrement);
+    }
+
     incrementField(documentReference: admin.firestore.DocumentReference, fieldPath: string, count?: number): Promise<any> {
         const incrementCount = count || 1;
         const increment = admin.firestore.FieldValue.increment(incrementCount);
