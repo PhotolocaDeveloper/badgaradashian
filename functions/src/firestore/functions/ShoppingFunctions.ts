@@ -17,7 +17,7 @@ export class ShoppingFunctions {
     updateShoppingListItemInListCount(before: DocumentSnapshot, after: DocumentSnapshot) {
         const itemBefore = deserialize(before.data(), ShoppingListItem);
         const itemAfter = deserialize(after.data(), ShoppingListItem);
-        if (itemBefore.list === itemAfter.list) return Promise.resolve();
+        if (itemBefore.list!.path === itemAfter.list!.path) return Promise.resolve();
         return Promise.all([
             this.decrementShoppingItemsInListCount(before),
             this.incrementShoppingItemsInListCount(after)

@@ -10,34 +10,54 @@ import {Change} from "firebase-functions";
 
 export class CaseToDoFunctions {
 
-    createTaskInListCollection(snapshot: DocumentSnapshot): Promise<any> {
-        if (snapshot === null || !snapshot.exists) return Promise.resolve();
+    createTaskInListCollection(snapshot: DocumentSnapshot, batch: admin.firestore.WriteBatch) {
+        if (snapshot === null || !snapshot.exists) return;
         const taskItem = deserialize(snapshot.data(), CaseToDo);
-        if (!taskItem.list) return Promise.resolve();
-        return taskItem.list.collection(FirestoreCollection.Tasks).doc(snapshot.id).set(snapshot.data()!)
+        if (taskItem.list) {
+            const docRef = taskItem.list.collection(FirestoreCollection.Tasks).doc(snapshot.id);
+            batch.set(docRef, snapshot.data()!);
+        }
     }
 
-    deleteTaskInListCollection(snapshot: DocumentSnapshot): Promise<any> {
-        if (snapshot === null || !snapshot.exists) return Promise.resolve();
+    deleteTaskInListCollection(snapshot: DocumentSnapshot, batch: admin.firestore.WriteBatch) {
+        if (snapshot === null || !snapshot.exists) return;
         const taskItem = deserialize(snapshot.data(), CaseToDo);
-        if (!taskItem.list) return Promise.resolve();
-        return taskItem.list.collection(FirestoreCollection.Tasks).doc(snapshot.id).delete()
+        if (taskItem.list) {
+            const docRef = taskItem.list.collection(FirestoreCollection.Tasks).doc(snapshot.id);
+            batch.delete(docRef);
+        }
     }
 
-    updateTaskInListCollection(change: Change<DocumentSnapshot>): Promise<any> {
-        return Promise.all([
-            this.deleteTaskInListCollection(change.before),
-            this.createTaskInListCollection(change.after)
-        ]);
+    updateTaskInListCollection(change: Change<DocumentSnapshot>, batch: admin.firestore.WriteBatch) {
+        const itemBefore = deserialize(change.before.data(), CaseToDo);
+        const itemAfter = deserialize(change.after.data(), CaseToDo);
+
+        const beforeListRef = itemBefore.list;
+        const afterListRef = itemAfter.list;
+
+        const beforeListPath = beforeListRef === undefined ? undefined : beforeListRef.path;
+        const afterListPath = afterListRef === undefined ? undefined : afterListRef.path;
+
+        if (beforeListPath !== afterListPath) {
+            this.deleteTaskInListCollection(change.before, batch);
+            this.createTaskInListCollection(change.after, batch);
+            return
+        }
+
+        if (afterListRef !== undefined) {
+            const docRef = afterListRef.collection(FirestoreCollection.Tasks).doc(change.after.id);
+            const data = change.after.data()!;
+            batch.update(docRef, data)
+        }
     }
 
     async updateDateToDoInList(snapshot: DocumentSnapshot) {
-        if (!snapshot || !snapshot.exists) return Promise.resolve("Snapshot is missing");
+        if (!snapshot || !snapshot.exists) return Promise.resolve();
 
         const tasksCollection = snapshot.ref.parent;
         const taskListRef = tasksCollection.parent;
 
-        if (!taskListRef) return Promise.resolve("List don't exist");
+        if (!taskListRef) return Promise.resolve();
 
         const querySnapshot = await tasksCollection
             .orderBy("date_to_do", "desc")
@@ -52,77 +72,114 @@ export class CaseToDoFunctions {
             newDate = task.dateToDo
         }
 
-        return taskListRef.update({"date_to_do": newDate})
+        return taskListRef.update({"date_to_do": newDate});
     }
 
     /**
      * Изменяет количество задач в связанных объектах при изменении задачи
      * @param before
      * @param after
+     * @param batch
      */
-    updateTaskInHouseCount(before: DocumentSnapshot, after: DocumentSnapshot) {
+    updateTaskInHouseCount(before: DocumentSnapshot, after: DocumentSnapshot, batch: admin.firestore.WriteBatch) {
         const itemBefore = deserialize(before.data(), CaseToDo);
         const itemAfter = deserialize(after.data(), CaseToDo);
-        if (itemBefore.object === itemAfter.object) return Promise.resolve();
-        return Promise.all([
-            this.decrementTaskInHouseCount(before),
-            this.incrementTaskInHouseCount(after)
-        ])
-    }
 
-    /**
-     * Изменяет количество задач в связанных списках при изменении задачи
-     * @param before
-     * @param after
-     */
-    updateTaskInListCount(before: DocumentSnapshot, after: DocumentSnapshot) {
-        const itemBefore = deserialize(before.data(), CaseToDo);
-        const itemAfter = deserialize(after.data(), CaseToDo);
-        if (itemBefore.list === itemAfter.list) return Promise.resolve();
-        return Promise.all([
-            this.decrementTasksInListCount(before),
-            this.incrementTasksInListCount(after)
-        ])
+        if (itemBefore.object !== undefined
+            && itemAfter.object !== undefined
+            && itemBefore.object!.path === itemAfter.object!.path)
+            return;
+
+        this.incrementTaskInHouseCount(after, batch);
+        this.decrementTaskInHouseCount(before, batch);
     }
 
     /**
      * Увеличивает счётчик количества задач в связанном объекте
      * @param snapshot
+     * @param batch
      */
-    incrementTaskInHouseCount(snapshot: DocumentSnapshot) {
+    incrementTaskInHouseCount(snapshot: DocumentSnapshot, batch?: admin.firestore.WriteBatch) {
         const item = deserialize(snapshot.data(), CaseToDo);
         if (item.object === undefined) return Promise.resolve();
+        if (batch !== undefined) {
+            Helper.firestore().incrementFieldWithBatch(batch, item.object, "tasks_count");
+            return
+        }
         return Helper.firestore().incrementField(item.object, "tasks_count")
     }
 
     /**
      * Уменьшает счётчик количества задач в связанном объекте
      * @param snapshot
+     * @param batch
      */
-    decrementTaskInHouseCount(snapshot: DocumentSnapshot) {
+    decrementTaskInHouseCount(snapshot: DocumentSnapshot, batch?: admin.firestore.WriteBatch) {
         const item = deserialize(snapshot.data(), CaseToDo);
         if (item.object === undefined) return Promise.resolve();
+        if (batch !== undefined) {
+            Helper.firestore().decrementFieldWithBatch(batch, item.object, "tasks_count");
+            return
+        }
         return Helper.firestore().decrementField(item.object, "tasks_count")
     }
+
 
     /**
      * Увеличивает счетчик количества задач в списке дел на 1
      * @param snapshot
+     * @param batch
      */
-    incrementTasksInListCount(snapshot: DocumentSnapshot) {
+    incrementTotalInListCount(snapshot: DocumentSnapshot, batch: admin.firestore.WriteBatch) {
+        const listRef = snapshot.ref.parent.parent;
+        if (!listRef) return;
+        Helper.firestore().incrementFieldWithBatch(batch, listRef, "items_count")
+    }
+
+    /**
+     * Увеличивает счётчик готовых задач в списке дел
+     * @param snapshot
+     * @param batch
+     */
+    incrementCompetedInListCount(snapshot: DocumentSnapshot, batch: admin.firestore.WriteBatch) {
+        const listRef = snapshot.ref.parent.parent;
         const taskItem = deserialize(snapshot.data(), CaseToDo);
-        if (taskItem.list === undefined) return Promise.resolve();
-        return Helper.firestore().incrementField(taskItem.list, "items_count")
+        if (!listRef || !taskItem.isDone) return;
+        Helper.firestore().incrementFieldWithBatch(batch, listRef, "done_item_count")
     }
 
     /**
      * Уменьшает счетчик количества задач в списке дел на 1
      * @param snapshot
+     * @param batch
      */
-    decrementTasksInListCount(snapshot: DocumentSnapshot) {
+    decrementTotalInListCount(snapshot: DocumentSnapshot, batch: admin.firestore.WriteBatch) {
+        const listRef = snapshot.ref.parent.parent;
+        if (!listRef) return;
+        Helper.firestore().decrementFieldWithBatch(batch, listRef, "items_count")
+    }
+
+    /**
+     * Уменьшает колчиество готовых зада в списке дел при удалении
+     * @param snapshot
+     * @param batch
+     */
+    decrementCompetedInListCount(snapshot: DocumentSnapshot, batch: admin.firestore.WriteBatch) {
+        const listRef = snapshot.ref.parent.parent;
         const taskItem = deserialize(snapshot.data(), CaseToDo);
-        if (taskItem.list === undefined) return Promise.resolve();
-        return Helper.firestore().decrementField(taskItem.list, "items_count")
+        if (!listRef || !taskItem.isDone) return;
+        Helper.firestore().decrementFieldWithBatch(batch, listRef, "done_item_count")
+    }
+
+    updateCompletedTaskInListCount(change: Change<DocumentSnapshot>): Promise<any> {
+        const itemBefore = deserialize(change.before.data(), CaseToDo);
+        const itemAfter = deserialize(change.after.data(), CaseToDo);
+        const listRef = change.after.ref.parent.parent;
+        if (!listRef) return Promise.resolve();
+        let inc = 0;
+        if (itemBefore.isDone && !itemAfter.isDone) inc = -1;
+        if (!itemBefore.isDone && itemAfter.isDone) inc = 1;
+        return Helper.firestore().incrementField(listRef, "done_item_count", inc)
     }
 
     /**

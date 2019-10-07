@@ -58,7 +58,7 @@ export class RoomFunctions {
      */
     incrementInventoryInHousingCount(snapshot: DocumentSnapshot): Promise<any> {
         const item = deserialize(snapshot.data(), Room);
-        if (item.object === undefined || item.inventoriesCount == undefined) return Promise.resolve();
+        if (item.object === undefined || item.inventoriesCount === undefined) return Promise.resolve();
         return Helper.firestore().incrementField(item.object, "inventories_count", item.inventoriesCount);
     }
 
@@ -68,7 +68,7 @@ export class RoomFunctions {
      */
     decrementInventoryInHousingCount(snapshot: DocumentSnapshot): Promise<any> {
         const item = deserialize(snapshot.data(), Room);
-        if (item.object === undefined || item.inventoriesCount == undefined) return Promise.resolve();
+        if (item.object === undefined || item.inventoriesCount === undefined) return Promise.resolve();
         return Helper.firestore().decrementField(item.object, "inventories_count", item.inventoriesCount);
     }
 

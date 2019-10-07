@@ -49,9 +49,17 @@ export const onCaseToDoUpdate = functions.firestore
     .document(FirestoreCollection.Tasks + "/{id}")
     .onUpdate(handlers.task.onUpdate);
 
-export const onCaseToDoWrite = functions.firestore
-    .document(FirestoreCollection.Tasks + "/{id}")
-    .onWrite(handlers.task.onWrite);
+export const onLocalTaskItemCreate = functions.firestore
+    .document(FirestoreCollection.TaskLists + "/{id}/" + FirestoreCollection.Tasks + "/{task_id}")
+    .onCreate(handlers.taskListItem.onCreate);
+
+export const onLocalTaskItemDelete = functions.firestore
+    .document(FirestoreCollection.TaskLists + "/{id}/" + FirestoreCollection.Tasks + "/{task_id}")
+    .onDelete(handlers.taskListItem.onDelete);
+
+export const onLocalTaskItemUpdate = functions.firestore
+    .document(FirestoreCollection.TaskLists + "/{id}/" + FirestoreCollection.Tasks + "/{task_id}")
+    .onUpdate(handlers.taskListItem.onUpdate);
 
 export const onLocalTaskItemWrite = functions.firestore
     .document(FirestoreCollection.TaskLists + "/{id}/" + FirestoreCollection.Tasks + "/{task_id}")
