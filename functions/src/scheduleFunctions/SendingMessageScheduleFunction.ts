@@ -24,7 +24,7 @@ async function getPlannedMessages(eventTime: admin.firestore.Timestamp): Promise
     const messagesSnapshot = await Helper.firestore().notificationScheduleCollection(eventTime).get();
     return messagesSnapshot.docs.map(document => {
         const message = deserialize(document.data(), NotificationPlanned);
-        message.referencePath = document.ref.path;
+        message.id = document.ref.id;
         return message
     });
 }

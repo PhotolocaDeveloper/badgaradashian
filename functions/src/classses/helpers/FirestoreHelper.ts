@@ -1,6 +1,7 @@
 import * as admin from "firebase-admin";
 import {Helper} from "./Helper";
 import {FirestoreCollection} from "../../enums/FirestoreCollection";
+import {deserialize} from "typescript-json-serializer";
 
 export class FirestoreHelper {
 
@@ -49,5 +50,10 @@ export class FirestoreHelper {
         return admin.firestore()
             .collection(FirestoreCollection.NotificationsSchedule)
             .doc(scheduleId).collection("items")
+    }
+
+    snapshotToObject<T>(snapshot: admin.firestore.DocumentSnapshot, type: new (...params: Array<any>) => T): T | undefined {
+        if (!snapshot.exists) return undefined;
+        return deserialize(snapshot.data(), type)
     }
 }
