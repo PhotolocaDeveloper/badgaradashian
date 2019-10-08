@@ -35,6 +35,7 @@ export class MessagePlannedAdapter {
         }
 
         return messageBuilder
+            .buildMessageReference(notification.referencePath)
             .buildNotification(notification.notificationTitle, notification.notificationBody)
             .buildData(notification.notificationData)
             .buildAndroid(notification.androidClickAction)

@@ -7,6 +7,8 @@ import Message = admin.messaging.Message;
 
 export class MessageBuilder implements IMessageBuilder {
 
+    messageReference?: string;
+
     recipientBuilder!: TokenMessageBuilder | TopicMessageBuilder;
 
     title?: string;
@@ -17,6 +19,11 @@ export class MessageBuilder implements IMessageBuilder {
 
     apnsCategory?: string;
     clickAction?: string;
+
+    buildMessageReference(reference?: string) {
+        this.messageReference = reference;
+        return this;
+    }
 
     buildNotification(title?: string, body?: string) {
         this.title = title;
@@ -56,6 +63,7 @@ export class MessageBuilder implements IMessageBuilder {
         message.data["title"] = this.title || "";
         message.data["body"] = this.body || "";
         message.data['click_action'] = this.clickAction || "";
+        message.data['notification_reference_path'] = this.messageReference || "";
 
         message.apns = {
             payload: {

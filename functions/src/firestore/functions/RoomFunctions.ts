@@ -45,6 +45,14 @@ export class RoomFunctions {
      * @param after
      */
     updateInventoryInHousingCount(before: DocumentSnapshot, after: DocumentSnapshot): Promise<any> {
+        const itemBefore = deserialize(before.data(), Room);
+        const itemAfter = deserialize(after.data(), Room);
+
+        if (itemBefore.object !== undefined
+            && itemAfter.object !== undefined
+            && itemBefore.object.path === itemAfter.object.path)
+            return Promise.resolve();
+
         return Promise.all([
             this.decrementInventoryInHousingCount(before),
             this.incrementInventoryInHousingCount(after)

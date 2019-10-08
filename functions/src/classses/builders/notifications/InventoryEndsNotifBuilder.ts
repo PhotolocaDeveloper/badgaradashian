@@ -54,7 +54,7 @@ export class InventoryEndsNotifBuilder extends NotificationBuilder {
     }
 
     buildPlanedDateToDispatch(): void {
-        const dateToDispatch = this.inventory.nextReplacementDate.toMillis() - 3600 * 1000;
+        const dateToDispatch = this.inventory.nextReplacementDate!.toMillis() - 3600 * 1000;
         this.notification.plannedDateOfDispatch = Firestore.Timestamp.fromMillis(dateToDispatch);
     }
 

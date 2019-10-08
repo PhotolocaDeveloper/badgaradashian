@@ -22,7 +22,7 @@ export class SLIBFromInventory extends ShoppingListItemBuilder {
     }
 
     buildDateToBuy(): void {
-        const dateToBuyMills = this.inventory.nextReplacementDate.toMillis() - 2 * 24 * 3600 * 1000;
+        const dateToBuyMills = this.inventory.nextReplacementDate!.toMillis() - 2 * 24 * 3600 * 1000;
         this.shoppingListItem.dateToBuy = admin.firestore.Timestamp.fromMillis(dateToBuyMills);
     }
 

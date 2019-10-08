@@ -9,7 +9,7 @@ export class InventoryHandlers {
         return Promise.all([
             Functions.inventory().createOnInventoryEndsNotification(snapshot),
             Functions.inventory().createShoppingListItem(snapshot),
-            Functions.inventory().incrementInventoryInListCount(snapshot)
+            Functions.inventory().incrementCountInParentObjects(snapshot)
         ])
     }
 
@@ -18,7 +18,7 @@ export class InventoryHandlers {
             Functions.general().deleteRelatedNotifications(snapshot),
             Functions.general().deleteRelatedPhotos(snapshot),
             Functions.inventory().deleteRelatedShoppingListItems(snapshot),
-            Functions.inventory().decrementInventoryInListCount(snapshot)
+            Functions.inventory().decrementCountInParentObjects(snapshot)
         ]);
     }
 

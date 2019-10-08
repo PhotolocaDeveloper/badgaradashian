@@ -1,4 +1,6 @@
 import * as admin from "firebase-admin";
+import {Helper} from "./Helper";
+import {FirestoreCollection} from "../../enums/FirestoreCollection";
 
 export class FirestoreHelper {
 
@@ -34,5 +36,18 @@ export class FirestoreHelper {
         const decCount = count || 1;
         const decrement = admin.firestore.FieldValue.increment(-decCount);
         return documentReference.update(fieldPath, decrement);
+    }
+
+    notificationScheduleId(timestamp: admin.firestore.Timestamp): string {
+        const timeMills = timestamp.toMillis() - timestamp.toMillis() % (60 * 1000);
+        const date = new Date(timeMills);
+        return date.toUTCString();
+    }
+
+    notificationScheduleCollection(timestamp: admin.firestore.Timestamp): admin.firestore.CollectionReference {
+        const scheduleId = Helper.firestore().notificationScheduleId(timestamp);
+        return admin.firestore()
+            .collection(FirestoreCollection.NotificationsSchedule)
+            .doc(scheduleId).collection("items")
     }
 }

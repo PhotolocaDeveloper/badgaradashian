@@ -5,21 +5,24 @@ import Firestore = admin.firestore;
 
 @Serializable()
 export class Inventory {
-    constructor(
-        @JsonProperty() public name: string,
-        @JsonProperty() public description: string,
-        @JsonProperty() public count: number,
-        @JsonProperty() public user: Firestore.DocumentReference,
-        @JsonProperty('inventory_list') public inventoryList: Firestore.DocumentReference,
-        @JsonProperty('replacement_frequency_time_interval') public replacementFrequencyTimeInterval: TimeInterval,
-        @JsonProperty('replacement_frequency_multiplier') public replacementFrequencyMultiplier: number,
-        @JsonProperty('last_replacement_date') public lastReplacementDate: Firestore.Timestamp,
-        @JsonProperty('next_replacement_date') public nextReplacementDate: Firestore.Timestamp,
-        @JsonProperty('life_time_multiplier') public lifeTimeMultiplier: number,
-        @JsonProperty('life_time__time_interval') public lifeTimeTimeInterval: TimeInterval,
-        @JsonProperty('object') public housing: Firestore.DocumentReference,
-        @JsonProperty() public room: Firestore.DocumentReference,
-        @JsonProperty('installation_date') public installationDate: Firestore.Timestamp,
-        @JsonProperty('date_created') public dateCreated: Firestore.Timestamp,
-    ) {}
+
+    @JsonProperty() name?: string;
+    @JsonProperty() description?: string;
+    @JsonProperty() count?: number;
+    @JsonProperty() user?: Firestore.DocumentReference;
+    @JsonProperty('inventory_list') inventoryList?: Firestore.DocumentReference;
+    @JsonProperty('replacement_frequency_time_interval') replacementFrequencyTimeInterval?: TimeInterval;
+    @JsonProperty('replacement_frequency_multiplier') replacementFrequencyMultiplier?: number;
+    @JsonProperty('last_replacement_date') lastReplacementDate?: Firestore.Timestamp;
+    @JsonProperty('next_replacement_date') nextReplacementDate?: Firestore.Timestamp;
+    @JsonProperty('life_time_multiplier') lifeTimeMultiplier?: number;
+    @JsonProperty('life_time__time_interval') lifeTimeTimeInterval?: TimeInterval;
+    @JsonProperty('object') housing?: Firestore.DocumentReference;
+    @JsonProperty() room?: Firestore.DocumentReference;
+    @JsonProperty('installation_date') installationDate?: Firestore.Timestamp;
+    @JsonProperty('date_created') dateCreated?: Firestore.Timestamp;
+
+    getParentRefs(): admin.firestore.DocumentReference[] {
+        return [this.housing, this.room, this.inventoryList].filter(ref => ref !== undefined).map(ref => ref!)
+    }
 }

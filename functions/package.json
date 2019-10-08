@@ -9,9 +9,9 @@
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
     "test": "npm run build && mocha --reporter spec",
-    "deploy-onTaskCreate": "firebase deploy --only functions:onCaseToDoCreate",
-    "deploy-onTaskDelete": "firebase deploy --only functions:onCaseToDoDelete",
-    "deploy-onTaskUpdate": "firebase deploy --only functions:onCaseToDoUpdate"
+    "deploy-taskHandlers": "firebase deploy --only functions:onCaseToDoCreate,functions:onCaseToDoDelete,functions:onCaseToDoUpdate",
+    "deploy-notificationHandlers": "firebase deploy --only functions:onNotificationCreate,functions:onNotificationDelete,functions:onNotificationUpdate",
+    "deploy-scheduleFuntions": "firebase deploy --only functions:sendingMessages"
   },
   "engines": {
     "node": "8"

@@ -6,6 +6,7 @@ import {RoomFunctions} from "./functions/RoomFunctions";
 import {HousingFunctions} from "./functions/HousingFunctions";
 import {InventoryListFunctions} from "./functions/InventoryListFunctions";
 import {TaskListFunctions} from "./functions/TaskListFunctions";
+import {NotificationFunctions} from "./functions/NotificationFunctions";
 
 export class Functions {
 
@@ -17,6 +18,14 @@ export class Functions {
     private static shoppingFunctions: ShoppingFunctions;
     private static roomFunctions: RoomFunctions;
     private static housingFunctions: HousingFunctions;
+    private static notificationsFunctions: NotificationFunctions;
+
+    static notification(): NotificationFunctions {
+        if (!Functions.notificationsFunctions) {
+            Functions.notificationsFunctions = new NotificationFunctions();
+        }
+        return Functions.notificationsFunctions;
+    }
 
     static general(): GeneralFunctions {
         if (!Functions.generalFunctions) {

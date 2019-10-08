@@ -17,6 +17,14 @@ export class InventoryListFunctions {
      * @param after
      */
     updateInventoryInRoomCount(before: DocumentSnapshot, after: DocumentSnapshot): Promise<any> {
+        const itemBefore = deserialize(before.data(), InventoryList);
+        const itemAfter = deserialize(after.data(), InventoryList);
+
+        if (itemBefore.room !== undefined
+            && itemAfter.room !== undefined
+            && itemAfter.room.path === itemBefore.room.path)
+            return Promise.resolve();
+
         return Promise.all([
             this.decrementInventoryInRoomCount(before),
             this.incrementInventoryInRoomCount(after)

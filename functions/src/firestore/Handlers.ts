@@ -9,6 +9,7 @@ import {PhotoHandlers} from "./handlers/PhotoHandlers";
 import {ShoppingListHandlers} from "./handlers/ShoppingListHandlers";
 import {UserHandlers} from "./handlers/UserHandlers";
 import {TaskListItemHandlers} from "./handlers/TaskListItemHandlers";
+import {NotificationHandlers} from "./handlers/NotificationHandlers";
 
 export const room = new RoomHandlers();
 export const housing = new HousingHandlers();
@@ -21,3 +22,4 @@ export const inventory = new InventoryHandlers();
 export const inventoryList = new InventoryListHandlers();
 export const photo = new PhotoHandlers();
 export const user = new UserHandlers();
+export const notifications = new NotificationHandlers();

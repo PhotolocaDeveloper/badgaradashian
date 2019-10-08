@@ -117,6 +117,18 @@ export const onHousingPhotosDelete = functions.firestore
     .document(FirestoreCollection.Housings + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
     .onDelete(handlers.photo.onDelete);
 
+export const onNotificationCreate = functions.firestore
+    .document(FirestoreCollection.Notifications + "/{id}")
+    .onCreate(handlers.notifications.onCreate);
+
+export const onNotificationDelete = functions.firestore
+    .document(FirestoreCollection.Notifications + "/{id}")
+    .onDelete(handlers.notifications.onDelete);
+
+export const onNotificationUpdate = functions.firestore
+    .document(FirestoreCollection.Notifications + "/{id}")
+    .onUpdate(handlers.notifications.onUpdate);
+
 export const sendingMessages = functions.pubsub
     .schedule('every 1 minutes')
     .onRun(schedule.sendingMessageScheduleFunction);

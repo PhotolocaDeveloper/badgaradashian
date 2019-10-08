@@ -7,6 +7,8 @@ import Firestore = admin.firestore;
 @Serializable()
 export class NotificationPlanned {
 
+    referencePath?: string;
+
     @JsonProperty()
     recipient?: string;
 
