@@ -33,8 +33,8 @@ export class TaskHandler {
     }
 
     onUpdate(change: Change<DocumentSnapshot>): Promise<any> {
-        const caseToDoBefore = deserialize(change.before, CaseToDo);
-        const caseToDoAfter = deserialize(change.after, CaseToDo);
+        const caseToDoBefore = deserialize(change.before.data(), CaseToDo);
+        const caseToDoAfter = deserialize(change.after.data(), CaseToDo);
 
         const batch = admin.firestore().batch();
 

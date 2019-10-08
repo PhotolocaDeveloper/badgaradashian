@@ -22,8 +22,8 @@ export class ShoppingListItemHandlers {
     }
 
     onUpdate(change: Change<DocumentSnapshot>): Promise<any> {
-        const caseToDoBefore = deserialize(change.before, ShoppingListItem);
-        const caseToDoAfter = deserialize(change.after, ShoppingListItem);
+        const caseToDoBefore = deserialize(change.before.data(), ShoppingListItem);
+        const caseToDoAfter = deserialize(change.after.data(), ShoppingListItem);
 
         const promises: Promise<any>[] = [
             Functions.shopping().updateShoppingListItemInListCount(change.before, change.after)
