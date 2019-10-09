@@ -93,6 +93,18 @@ export const onShoppingListDelete = functions.firestore
     .document(FirestoreCollection.BuyLists + "/{id}")
     .onDelete(handlers.shoppingList.onDelete);
 
+export const onLocalShoppingListItemCreate = functions.firestore
+    .document(FirestoreCollection.BuyLists + "/{id}/" + FirestoreCollection.Buys + "/{shopping_item_id}")
+    .onCreate(handlers.shoppingItemLocal.onCreate);
+
+export const onLocalShoppingListItemDelete = functions.firestore
+    .document(FirestoreCollection.BuyLists + "/{id}/" + FirestoreCollection.Buys + "/{shopping_item_id}")
+    .onDelete(handlers.shoppingItemLocal.onDelete);
+
+export const onLocalShoppingListItemWrite = functions.firestore
+    .document(FirestoreCollection.BuyLists + "/{id}/" + FirestoreCollection.Buys + "/{shopping_item_id}")
+    .onWrite(handlers.shoppingItemLocal.onWrite);
+
 export const onRoomDelete = functions.firestore
     .document(FirestoreCollection.Rooms + "/{id}")
     .onDelete(handlers.room.onDelete);

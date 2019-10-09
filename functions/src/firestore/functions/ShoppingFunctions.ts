@@ -10,77 +10,23 @@ import {Change} from "firebase-functions";
 
 export class ShoppingFunctions {
 
-    private static shoppingListDocumentReference(snapshot: DocumentSnapshot): admin.firestore.DocumentReference | undefined {
-        const item = Helper.firestore().snapshotToObject(snapshot, ShoppingListItem);
-        if (item === undefined || item.list === undefined) return undefined;
-        return item.list.collection("items").doc(snapshot.id);
-    }
+    async updateMaxDateToDo(snapshot: DocumentSnapshot): Promise<any> {
 
-    copyToShoppingList(snapshot: DocumentSnapshot, _batch?: admin.firestore.WriteBatch): admin.firestore.WriteBatch {
-        const batch = _batch || admin.firestore().batch();
-        const documentReference = ShoppingFunctions.shoppingListDocumentReference(snapshot);
-        if (documentReference !== undefined)
-            batch.set(documentReference, snapshot.data()!);
-        return batch;
-    }
+        const parentCollectionReference = snapshot.ref.parent;
+        const targetDocumentReference = snapshot.ref.parent.parent;
 
-    removeFormShoppingList(snapshot: DocumentSnapshot, _batch?: admin.firestore.WriteBatch): admin.firestore.WriteBatch {
-        const batch = _batch || admin.firestore().batch();
-        const documentReference = ShoppingFunctions.shoppingListDocumentReference(snapshot);
+        if (!parentCollectionReference || !targetDocumentReference) return Promise.resolve();
 
-        if (documentReference !== undefined)
-            batch.delete(documentReference);
+        const querySnapshot = await parentCollectionReference.orderBy("date_to_buy", "desc").limit(1).get();
+        const firstSnapshot = querySnapshot.docs.pop();
 
-        return batch;
-    }
+        if (!firstSnapshot) return Promise.resolve();
 
-    updateAtShoppingList(change: Change<DocumentSnapshot>, _batch?: admin.firestore.WriteBatch): admin.firestore.WriteBatch {
-        const batch = _batch || admin.firestore().batch();
-        const itemInListRefBefore = ShoppingFunctions.shoppingListDocumentReference(change.before);
-        const itemInListRefAfter = ShoppingFunctions.shoppingListDocumentReference(change.after);
+        const firstItem = Helper.firestore().snapshotToObject(firstSnapshot, ShoppingListItem);
 
-        if (itemInListRefBefore !== undefined && itemInListRefBefore !== itemInListRefAfter)
-            batch.delete(itemInListRefBefore);
+        if (!firstItem || !firstItem.dateToBuy) return Promise.resolve();
 
-        if (itemInListRefAfter !== undefined)
-            batch.set(itemInListRefAfter, change.after.data()!);
-
-        return batch
-    }
-
-    /**
-     * Изменяет количество элементов списка покупок в связанных списках
-     * @param before
-     * @param after
-     */
-    updateShoppingListItemInListCount(before: DocumentSnapshot, after: DocumentSnapshot) {
-        const itemBefore = deserialize(before.data(), ShoppingListItem);
-        const itemAfter = deserialize(after.data(), ShoppingListItem);
-        if (itemBefore.list!.path === itemAfter.list!.path) return Promise.resolve();
-        return Promise.all([
-            this.decrementShoppingItemsInListCount(before),
-            this.incrementShoppingItemsInListCount(after)
-        ])
-    }
-
-    /**
-     * Увеличивает счетчик количества покупок в списке на 1
-     * @param snapshot
-     */
-    incrementShoppingItemsInListCount(snapshot: DocumentSnapshot) {
-        const item = deserialize(snapshot.data(), ShoppingListItem);
-        if (item.list === undefined) return Promise.resolve();
-        return Helper.firestore().incrementField(item.list, "items_count")
-    }
-
-    /**
-     * Уменьшает счетчик количества покупок в списке на 1
-     * @param snapshot
-     */
-    decrementShoppingItemsInListCount(snapshot: DocumentSnapshot) {
-        const item = deserialize(snapshot.data(), ShoppingListItem);
-        if (item.list === undefined) return Promise.resolve();
-        return Helper.firestore().decrementField(item.list, "items_count")
+        return targetDocumentReference.update("max_date_to_buy", firstItem.dateToBuy);
     }
 
     /**
@@ -112,5 +58,48 @@ export class ShoppingFunctions {
         const notification = notificationCreator.construct().get();
 
         return admin.firestore().collection(FirestoreCollection.Notifications).doc().create(serialize(notification));
+    }
+
+    /**
+     * Увеличивает счётчик готовых задач в списке дел
+     * @param snapshot
+     * @param _batch
+     */
+    incrementCompetedInListCount(snapshot: DocumentSnapshot, _batch?: admin.firestore.WriteBatch) {
+        const batch = _batch || admin.firestore().batch();
+        const listRef = snapshot.ref.parent.parent;
+        const taskItem = deserialize(snapshot.data(), ShoppingListItem);
+        if (!listRef || !taskItem.isDone) return batch;
+        return Helper.firestore().incrementFieldWithBatch(batch, listRef, "done_item_count")
+    }
+
+    /**
+     * Уменьшает колчиество готовых зада в списке дел при удалении
+     * @param snapshot
+     * @param _batch
+     */
+    decrementCompetedInListCount(snapshot: DocumentSnapshot, _batch?: admin.firestore.WriteBatch) {
+        const batch = _batch || admin.firestore().batch();
+        const listRef = snapshot.ref.parent.parent;
+        const taskItem = deserialize(snapshot.data(), ShoppingListItem);
+        if (!listRef || !taskItem.isDone) return batch;
+        return Helper.firestore().decrementFieldWithBatch(batch, listRef, "done_item_count")
+    }
+
+    /**
+     *
+     * @param change
+     * @param _batch
+     */
+    updateCompletedTaskInListCount(change: Change<DocumentSnapshot>, _batch?: admin.firestore.WriteBatch) {
+        const batch = _batch || admin.firestore().batch();
+        const itemBefore = deserialize(change.before.data(), ShoppingListItem);
+        const itemAfter = deserialize(change.after.data(), ShoppingListItem);
+        const listRef = change.after.ref.parent.parent;
+        if (!listRef) return batch;
+        let inc = 0;
+        if (itemBefore.isDone && !itemAfter.isDone) inc = -1;
+        if (!itemBefore.isDone && itemAfter.isDone) inc = 1;
+        return Helper.firestore().incrementFieldWithBatch(batch, listRef, "done_item_count", inc)
     }
 }

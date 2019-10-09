@@ -11,7 +11,7 @@ export class ShoppingListItemHandlers {
     private static LIST_FIELD = new admin.firestore.FieldPath("list");
     private static HOUSING_FIELD = new admin.firestore.FieldPath("object");
 
-    private static COLLECTION_NAME = FirestoreCollection.TaskLists;
+    private static COLLECTION_NAME = FirestoreCollection.Buys;
 
     onCreate(snapshot: DocumentSnapshot): Promise<any> {
         return Promise.all([

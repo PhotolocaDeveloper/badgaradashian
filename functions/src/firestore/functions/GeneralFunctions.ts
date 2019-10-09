@@ -4,6 +4,8 @@ import {FirestoreCollection} from "../../enums/FirestoreCollection";
 import {Helper} from "../../classses/helpers/Helper";
 import {Change} from "firebase-functions";
 import WriteBatch = admin.firestore.WriteBatch;
+import FieldValue = admin.firestore.FieldValue;
+import FieldPath = admin.firestore.FieldPath;
 
 export class GeneralFunctions {
     /**
@@ -62,6 +64,16 @@ export class GeneralFunctions {
         if (parentReference instanceof admin.firestore.DocumentReference)
             return parentReference.collection(subCollectionName).doc(snapshot.id);
         return undefined
+    }
+
+    updateCountInParentCollection(snapshot: DocumentSnapshot, field: FieldPath, count: number, _batch?: WriteBatch): WriteBatch {
+        const batch = _batch || admin.firestore().batch();
+        const fieldValue = FieldValue.increment(1);
+        const ref = snapshot.ref.parent.parent;
+        if (ref) {
+            batch.update(ref, field, fieldValue)
+        }
+        return batch
     }
 
 }

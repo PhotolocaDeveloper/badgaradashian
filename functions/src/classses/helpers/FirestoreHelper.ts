@@ -16,25 +16,27 @@ export class FirestoreHelper {
     }
 
     incrementFieldWithBatch(batch: admin.firestore.WriteBatch, documentReference: admin.firestore.DocumentReference, fieldPath: string, count?: number) {
-        const incrementCount = count || 1;
+        const incrementCount = count === undefined ? 1 : count;
         const increment = admin.firestore.FieldValue.increment(incrementCount);
         batch.update(documentReference, fieldPath, increment);
+        return batch
     }
 
     decrementFieldWithBatch(batch: admin.firestore.WriteBatch, documentReference: admin.firestore.DocumentReference, fieldPath: string, count?: number) {
-        const decCount = count || 1;
+        const decCount = count === undefined ? 1 : count;
         const decrement = admin.firestore.FieldValue.increment(-decCount);
         batch.update(documentReference, fieldPath, decrement);
+        return batch
     }
 
     incrementField(documentReference: admin.firestore.DocumentReference, fieldPath: string, count?: number): Promise<any> {
-        const incrementCount = count || 1;
+        const incrementCount = count === undefined ? 1 : count;
         const increment = admin.firestore.FieldValue.increment(incrementCount);
         return documentReference.update(fieldPath, increment);
     }
 
     decrementField(documentReference: admin.firestore.DocumentReference, fieldPath: string, count?: number): Promise<any> {
-        const decCount = count || 1;
+        const decCount = count === undefined ? 1 : count;
         const decrement = admin.firestore.FieldValue.increment(-decCount);
         return documentReference.update(fieldPath, decrement);
     }

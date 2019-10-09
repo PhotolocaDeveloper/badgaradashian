@@ -8,7 +8,7 @@ export class ShoppingListItem {
     @JsonProperty() description?: string;
     @JsonProperty() count?: number;
 
-    @JsonProperty('is_done ') isDone?: boolean;
+    @JsonProperty('is_done') isDone?: boolean;
 
     @JsonProperty() list?: admin.firestore.DocumentReference;
     @JsonProperty('object') housing?: admin.firestore.DocumentReference;

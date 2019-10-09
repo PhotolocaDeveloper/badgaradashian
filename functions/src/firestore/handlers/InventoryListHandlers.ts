@@ -5,14 +5,14 @@ import {Functions} from "../Functions";
 export class InventoryListHandlers {
     onCreate(snapshot: DocumentSnapshot): Promise<any> {
         return Promise.all([
-            Functions.inventoryList().incrementInventoryListsInRoomCount(snapshot)
+            Functions.inventoryList().incrementInventoryListsInRoomCount(snapshot).commit()
         ])
     }
 
     onDelete(snapshot: DocumentSnapshot): Promise<any> {
         return Promise.all([
             Functions.inventoryList().deleteInventoryListItems(snapshot),
-            Functions.inventoryList().decrementInventoryListsInRoomCount(snapshot)
+            Functions.inventoryList().decrementInventoryListsInRoomCount(snapshot).commit()
         ])
     }
 

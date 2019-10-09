@@ -61,31 +61,38 @@ export class InventoryListFunctions {
     updateInventoryListInRoomCount(before: DocumentSnapshot, after: DocumentSnapshot): Promise<any> {
         const itemBefore = deserialize(before.data(), InventoryList);
         const itemAfter = deserialize(after.data(), InventoryList);
-        if (itemBefore.room === itemAfter.room) return Promise.resolve();
-        return Promise.all([
-            this.decrementInventoryListsInRoomCount(before),
-            this.incrementInventoryListsInRoomCount(after)
-        ])
+
+        const roomRefBefore = itemBefore.room;
+        const roomRefAfter = itemAfter.room;
+
+        if (roomRefAfter && roomRefBefore && roomRefAfter.path === roomRefBefore.path) return Promise.resolve();
+
+        const batch = this.decrementInventoryListsInRoomCount(before);
+        return this.incrementInventoryListsInRoomCount(after, batch).commit();
     }
 
     /**
      * Увеличивает счетчик количества списков инвентаря в комнате на 1
      * @param snapshot
+     * @param _batch
      */
-    incrementInventoryListsInRoomCount(snapshot: DocumentSnapshot) {
+    incrementInventoryListsInRoomCount(snapshot: DocumentSnapshot, _batch?: admin.firestore.WriteBatch) {
+        const batch = _batch || admin.firestore().batch();
         const item = deserialize(snapshot.data(), InventoryList);
-        if (item.room === undefined) return Promise.resolve();
-        return Helper.firestore().incrementField(item.room, "inventory_lists_count")
+        if (item.room === undefined) return batch;
+        return Helper.firestore().incrementFieldWithBatch(batch, item.room, "inventory_lists_count")
     }
 
     /**
      * Увеличивает счетчик количества списков инвентаря в комнате на 1
      * @param snapshot
+     * @param _batch
      */
-    decrementInventoryListsInRoomCount(snapshot: DocumentSnapshot) {
+    decrementInventoryListsInRoomCount(snapshot: DocumentSnapshot, _batch?: admin.firestore.WriteBatch) {
+        const batch = _batch || admin.firestore().batch();
         const item = deserialize(snapshot.data(), InventoryList);
-        if (item.room === undefined) return Promise.resolve();
-        return Helper.firestore().decrementField(item.room, "inventory_lists_count", item.inventoriesCount)
+        if (item.room === undefined) return batch;
+        return Helper.firestore().decrementFieldWithBatch(batch, item.room, "inventory_lists_count", item.inventoriesCount)
     }
 
     /** Изменение количиства списков инвентаря в связанных объектах **/
