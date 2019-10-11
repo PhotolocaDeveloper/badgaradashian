@@ -44,14 +44,18 @@ export class FirestoreHelper {
     notificationScheduleId(timestamp: admin.firestore.Timestamp): string {
         const timeMills = timestamp.toMillis() - timestamp.toMillis() % (60 * 1000);
         const date = new Date(timeMills);
-        return date.toUTCString();
+        return date.toISOString();
     }
 
-    notificationScheduleCollection(timestamp: admin.firestore.Timestamp): admin.firestore.CollectionReference {
+    notificationScheduleDoc(timestamp: admin.firestore.Timestamp): admin.firestore.DocumentReference {
         const scheduleId = Helper.firestore().notificationScheduleId(timestamp);
         return admin.firestore()
             .collection(FirestoreCollection.NotificationsSchedule)
-            .doc(scheduleId).collection("items")
+            .doc(scheduleId)
+    }
+
+    notificationScheduleCollection(timestamp: admin.firestore.Timestamp): admin.firestore.CollectionReference {
+        return this.notificationScheduleDoc(timestamp).collection("items")
     }
 
     snapshotToObject<T>(snapshot: admin.firestore.DocumentSnapshot, type: new (...params: Array<any>) => T): T | undefined {

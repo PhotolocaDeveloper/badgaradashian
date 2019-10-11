@@ -68,7 +68,7 @@ export class GeneralFunctions {
 
     updateCountInParentCollection(snapshot: DocumentSnapshot, field: FieldPath, count: number, _batch?: WriteBatch): WriteBatch {
         const batch = _batch || admin.firestore().batch();
-        const fieldValue = FieldValue.increment(1);
+        const fieldValue = FieldValue.increment(count);
         const ref = snapshot.ref.parent.parent;
         if (ref) {
             batch.update(ref, field, fieldValue)
