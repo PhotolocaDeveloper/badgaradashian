@@ -2,6 +2,7 @@ import * as functions from 'firebase-functions';
 import * as admin from "firebase-admin";
 import * as schedule from "./scheduleFunctions"
 import * as handlers from './firestore/Handlers'
+import * as https from './firestore/HttpsHandlers'
 import {FirestoreCollection} from "./enums/FirestoreCollection";
 
 admin.initializeApp();
@@ -144,3 +145,10 @@ export const onNotificationUpdate = functions.firestore
 export const sendingMessages = functions.pubsub
     .schedule('every 1 minutes')
     .onRun(schedule.sendingMessageScheduleFunction);
+
+export const generateAuthUrl = functions.https.onCall(https.calendar.generateAuthUrl);
+
+export const calendarOAuth = functions.https.onRequest((async (req) => {
+    const {code, state} = req.query;
+    https.calendar.calendarOAuth(state, code);
+}));
