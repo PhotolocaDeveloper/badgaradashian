@@ -14,7 +14,8 @@ export class IdentifierCreator {
 
     construct() {
         this.builder.create();
-        this.builder.build()
+        this.builder.build();
+        return this
     }
 
 }
