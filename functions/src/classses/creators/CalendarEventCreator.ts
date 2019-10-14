@@ -17,6 +17,7 @@ export class CalendarEventCreator {
             .buildEnd()
             .buildStart()
             .buildSummary()
+            .buildRecurrence()
             .build();
         return this
     }

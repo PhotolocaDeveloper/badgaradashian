@@ -32,7 +32,6 @@ export async function sendingMessageScheduleFunction() {
     })
 }
 
-
 /**
  * Получает сообщения для отправки за определённый период
  */

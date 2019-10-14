@@ -8,8 +8,8 @@ export class TaskListItemHandlers {
     onCreate(snapshot: DocumentSnapshot): Promise<any> {
         const batch = admin.firestore().batch();
 
-        Functions.caseToDo().incrementTotalInListCount(snapshot, batch);
-        Functions.caseToDo().incrementCompetedInListCount(snapshot, batch);
+        Functions.task().incrementTotalInListCount(snapshot, batch);
+        Functions.task().incrementCompetedInListCount(snapshot, batch);
 
         return batch.commit()
     }
@@ -17,22 +17,22 @@ export class TaskListItemHandlers {
     onDelete(snapshot: DocumentSnapshot): Promise<any> {
         const batch = admin.firestore().batch();
 
-        Functions.caseToDo().decrementTotalInListCount(snapshot, batch);
-        Functions.caseToDo().decrementCompetedInListCount(snapshot, batch);
+        Functions.task().decrementTotalInListCount(snapshot, batch);
+        Functions.task().decrementCompetedInListCount(snapshot, batch);
 
         return batch.commit();
     }
 
     onUpdate(change: Change<DocumentSnapshot>): Promise<any> {
         return Promise.all([
-            Functions.caseToDo().updateCompletedTaskInListCount(change)
+            Functions.task().updateCompletedTaskInListCount(change)
         ])
     }
 
     onWrite(change: Change<DocumentSnapshot>): Promise<any> {
         return Promise.all([
-            Functions.caseToDo().updateDateToDoInList(change.after),
-            Functions.caseToDo().updateDateToDoInList(change.before)
+            Functions.task().updateDateToDoInList(change.after),
+            Functions.task().updateDateToDoInList(change.before)
         ]);
     }
 }

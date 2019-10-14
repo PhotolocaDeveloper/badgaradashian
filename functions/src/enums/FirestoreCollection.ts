@@ -12,5 +12,6 @@ export enum FirestoreCollection {
     Notifications = 'notifications',
     NotificationsSchedule = 'notifications_schedule',
     Photos = 'photos',
-    SERVICES = "service"
+    SERVICES = "service",
+    CalendarEvents = "calendar_events"
 }

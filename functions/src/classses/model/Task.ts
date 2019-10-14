@@ -5,7 +5,7 @@ import DocumentReference = admin.firestore.DocumentReference;
 import Timestamp = admin.firestore.Timestamp;
 
 @Serializable()
-export class CaseToDo {
+export class Task {
     @JsonProperty() name?: string;
     @JsonProperty() description?: string;
     @JsonProperty() object?: DocumentReference;

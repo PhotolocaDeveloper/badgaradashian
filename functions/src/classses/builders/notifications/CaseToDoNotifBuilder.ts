@@ -1,5 +1,5 @@
 import {NotificationBuilder} from "../../abstract/NotificationBuilder";
-import {CaseToDo} from "../../model/CaseToDo";
+import {Task} from "../../model/Task";
 import * as admin from "firebase-admin";
 import {NotificationClickAction} from "../../../enums/NotificationClickAction";
 import {NotificationApnsCategory} from "../../../enums/NotificationApnsCategory";
@@ -13,7 +13,7 @@ export class CaseToDoNotifBuilder extends NotificationBuilder {
     constructor(
         private recipientId: string,
         private relatedObject: DocumentReference,
-        private caseToDo: CaseToDo
+        private caseToDo: Task
     ) {
         super()
     }

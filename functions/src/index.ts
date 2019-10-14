@@ -142,13 +142,26 @@ export const onNotificationUpdate = functions.firestore
     .document(FirestoreCollection.Notifications + "/{id}")
     .onUpdate(handlers.notifications.onUpdate);
 
+export const onCalendarEventCreate = functions.firestore
+    .document(FirestoreCollection.CalendarEvents + "/{id}")
+    .onCreate(handlers.calendarEvent.onCreate);
+
+export const onCalendarEventDelete = functions.firestore
+    .document(FirestoreCollection.CalendarEvents + "/{id}")
+    .onDelete(handlers.calendarEvent.onDelete);
+
+export const onCalendarEventUpdate = functions.firestore
+    .document(FirestoreCollection.CalendarEvents + "/{id}")
+    .onUpdate(handlers.calendarEvent.onUpdate);
+
 export const sendingMessages = functions.pubsub
     .schedule('every 1 minutes')
     .onRun(schedule.sendingMessageScheduleFunction);
 
 export const generateAuthUrl = functions.https.onCall(https.calendar.generateAuthUrl);
 
-export const calendarOAuth = functions.https.onRequest((async (req) => {
+export const calendarOAuth = functions.https.onRequest((async (req, resp) => {
     const {code, state} = req.query;
     https.calendar.calendarOAuth(state, code);
+    resp.send();
 }));

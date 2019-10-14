@@ -6,15 +6,17 @@ import {FirestoreCollection} from "../../enums/FirestoreCollection";
 import {deserialize} from "typescript-json-serializer";
 import {UserSettingSynchronization} from "../model/UserSettingSynchronization";
 import {OAuth2Client} from 'googleapis-common';
-import {GoogleAuth} from 'google-auth-library';
+import * as credentials from '../../credetials.json'
 import Schema$Event = calendar_v3.Schema$Event;
 
 
 export class Calendar implements CalendarFunctions$EventDelegate {
 
     private static instance?: Calendar;
-    readonly auth: GoogleAuth = new google.auth.GoogleAuth({
-        scopes: ['https://www.googleapis.com/auth/calendar']
+    private oauth2Client = new google.auth.OAuth2({
+        clientId: credentials.web.client_id,
+        clientSecret: credentials.web.client_secret,
+        redirectUri: credentials.web.redirect_uris[2]
     });
     event: CalendarFunctions$Event;
 
@@ -39,29 +41,29 @@ export class Calendar implements CalendarFunctions$EventDelegate {
     private static async getSyncSettings(uid: string) {
         const ref = Calendar.getSyncSettingsRef(uid);
         const snapshot = await ref.get();
+        if (!snapshot.exists) return undefined;
         return deserialize(snapshot.data(), UserSettingSynchronization)
     }
 
     async generateAuthUrl(uid: string) {
-        const authClient = await this.auth.getClient();
-        return authClient.generateAuthUrl({
+        return this.oauth2Client.generateAuthUrl({
             access_type: 'offline',
-            state: uid
+            state: uid,
+            scope: ['https://www.googleapis.com/auth/calendar']
         })
     }
 
     async getOAuth2Client(uid: string): Promise<OAuth2Client | undefined> {
         const settings = await Calendar.getSyncSettings(uid);
+        if (!settings) return undefined;
         const tokens = settings.tokens;
-        if (!tokens) return undefined;
-        const oauth2Client = await this.auth.getClient();
-        oauth2Client.setCredentials(tokens);
-        return oauth2Client;
+        if (!tokens || !settings.isSynchronizationOn) return undefined;
+        this.oauth2Client.setCredentials(tokens);
+        return this.oauth2Client;
     }
 
     async refreshOAuth2Tokens(uid: string, code: string) {
-        const oauth2Client = await this.auth.getClient();
-        const {tokens} = await oauth2Client.getToken(code);
+        const {tokens} = await this.oauth2Client.getToken(code);
         const settingDocumentRef = Calendar.getSyncSettingsRef(uid);
         return settingDocumentRef.update({tokens: tokens})
     }
@@ -74,6 +76,7 @@ class CalendarFunctions$Event {
 
     async insert(uid: string, event: Schema$Event) {
         const oauth2Client = await this.delegate.getOAuth2Client(uid);
+        if (!oauth2Client) return Promise.resolve();
         return this.calendar.events.insert({
             auth: oauth2Client,
             calendarId: 'primary',
@@ -83,6 +86,7 @@ class CalendarFunctions$Event {
 
     async update(uid: string, eventId: string, event: Schema$Event) {
         const oauth2Client = await this.delegate.getOAuth2Client(uid);
+        if (!oauth2Client) return Promise.resolve();
         return this.calendar.events.update({
             auth: oauth2Client,
             calendarId: 'primary',

@@ -13,10 +13,12 @@ export class GeneralFunctions {
      * @param snapshot
      */
     deleteRelatedNotifications(snapshot: DocumentSnapshot): Promise<any> {
+        console.info("Started: deleteRelatedNotifications");
         const ref = snapshot.ref;
         const query = admin.firestore()
             .collection(FirestoreCollection.Notifications)
             .where("related_object", "==", ref);
+        console.info("Finished: deleteRelatedNotifications");
         return Helper.firestore().deleteAllFilesInQuery(query);
     }
 

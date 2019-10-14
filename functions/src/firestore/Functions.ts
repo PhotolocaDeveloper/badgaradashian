@@ -1,24 +1,33 @@
 import {GeneralFunctions} from "./functions/GeneralFunctions";
 import {InventoryFunctions} from "./functions/InventoryFunctions";
-import {CaseToDoFunctions} from "./functions/CaseToDoFunctions";
+import {TaskFunctions} from "./functions/TaskFunctions";
 import {ShoppingFunctions} from "./functions/ShoppingFunctions";
 import {RoomFunctions} from "./functions/RoomFunctions";
 import {HousingFunctions} from "./functions/HousingFunctions";
 import {InventoryListFunctions} from "./functions/InventoryListFunctions";
 import {TaskListFunctions} from "./functions/TaskListFunctions";
 import {NotificationFunctions} from "./functions/NotificationFunctions";
+import {CalendarEventFunctions} from "./functions/CalendarEventFunctions";
 
 export class Functions {
 
     private static generalFunctions: GeneralFunctions;
     private static inventoryFunctions: InventoryFunctions;
     private static inventoryListFunctions: InventoryListFunctions;
-    private static caseToDoFunctions: CaseToDoFunctions;
+    private static taskFunctions: TaskFunctions;
     private static taskListFunctions: TaskListFunctions;
     private static shoppingFunctions: ShoppingFunctions;
     private static roomFunctions: RoomFunctions;
     private static housingFunctions: HousingFunctions;
     private static notificationsFunctions: NotificationFunctions;
+    private static calendarEventsFunctions: CalendarEventFunctions;
+
+    static calendarEvent(): CalendarEventFunctions {
+        if (!Functions.calendarEventsFunctions) {
+            Functions.calendarEventsFunctions = new CalendarEventFunctions();
+        }
+        return Functions.calendarEventsFunctions;
+    }
 
     static notification(): NotificationFunctions {
         if (!Functions.notificationsFunctions) {
@@ -48,11 +57,11 @@ export class Functions {
         return Functions.inventoryListFunctions;
     }
 
-    static caseToDo(): CaseToDoFunctions {
-        if (!Functions.caseToDoFunctions) {
-            Functions.caseToDoFunctions = new CaseToDoFunctions();
+    static task(): TaskFunctions {
+        if (!Functions.taskFunctions) {
+            Functions.taskFunctions = new TaskFunctions();
         }
-        return Functions.caseToDoFunctions;
+        return Functions.taskFunctions;
     }
 
     static taskList(): TaskListFunctions {

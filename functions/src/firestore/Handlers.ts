@@ -11,6 +11,7 @@ import {UserHandlers} from "./handlers/UserHandlers";
 import {TaskListItemHandlers} from "./handlers/TaskListItemHandlers";
 import {NotificationHandlers} from "./handlers/NotificationHandlers";
 import {ShoppingItemLocalHandlers} from "./handlers/ShoppingItemLocalHandlers";
+import {CalendarEventHandlers} from "./handlers/CalendarEventHandlers";
 
 export const room = new RoomHandlers();
 export const housing = new HousingHandlers();
@@ -25,3 +26,4 @@ export const photo = new PhotoHandlers();
 export const user = new UserHandlers();
 export const notifications = new NotificationHandlers();
 export const shoppingItemLocal = new ShoppingItemLocalHandlers();
+export const calendarEvent = new CalendarEventHandlers();

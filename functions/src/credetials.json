@@ -1,0 +1,21 @@
+{
+  "web": {
+    "client_id": "856844876175-cmq50eg201g7v3r6jgr57n2odou5d4gn.apps.googleusercontent.com",
+    "project_id": "badger-ce526",
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+    "token_uri": "https://oauth2.googleapis.com/token",
+    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+    "client_secret": "gTp-f8ycZP36dAuH9TU_HLXX",
+    "redirect_uris": [
+      "https://badger-ce526.firebaseapp.com/__/auth/handler",
+      "https://badger-ce526.web.app/__/auth/handler",
+      "https://us-central1-badger-ce526.cloudfunctions.net/calendarOAuth"
+    ],
+    "javascript_origins": [
+      "http://localhost",
+      "http://localhost:5000",
+      "https://badger-ce526.firebaseapp.com",
+      "https://badger-ce526.web.app"
+    ]
+  }
+}
