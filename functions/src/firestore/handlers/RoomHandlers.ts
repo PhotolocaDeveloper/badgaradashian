@@ -5,7 +5,8 @@ import {Change} from "firebase-functions";
 export class RoomHandlers {
     onCreate(snapshot: DocumentSnapshot): Promise<any> {
         return Promise.all([
-            Functions.room().incrementRoomInHousingCount(snapshot)
+            Functions.room().incrementRoomInHousingCount(snapshot),
+            Functions.room().createBaseInventoryList(snapshot)
         ])
     }
 

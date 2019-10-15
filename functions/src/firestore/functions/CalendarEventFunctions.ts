@@ -4,9 +4,10 @@ import {deserialize} from "typescript-json-serializer";
 import {CalendarEventWrapper} from "../../classses/model/CalendarEventWrapper";
 import {FirestoreCollection} from "../../enums/FirestoreCollection";
 import {Calendar} from "../../classses/adapters/Calendar";
+import WriteBatch = admin.firestore.WriteBatch;
 
 export class CalendarEventFunctions {
-    copyToLocalCollections(snapshot: DocumentSnapshot, _batch?: FirebaseFirestore.WriteBatch) {
+    copyToLocalCollections(snapshot: DocumentSnapshot, _batch?: WriteBatch) {
         const batch = _batch || admin.firestore().batch();
         if (!snapshot.exists) return batch;
         const eventWrapper = deserialize(snapshot.data(), CalendarEventWrapper);

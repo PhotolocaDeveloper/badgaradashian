@@ -4,8 +4,18 @@ import {FirestoreCollection} from "../../enums/FirestoreCollection";
 import {Helper} from "../../classses/helpers/Helper";
 import {deserialize} from "typescript-json-serializer";
 import {Room} from "../../classses/model/Room";
+import {ILBBase} from "../../classses/builders/inventoryList/ILBBase";
+import {InventoryListCreator} from "../../classses/creators/InventoryListCreator";
 
 export class RoomFunctions {
+
+    createBaseInventoryList(snapshot: DocumentSnapshot) {
+        const item = deserialize(snapshot.data(), Room);
+        if (!item.user || !item.object) return Promise.reject("User or object unset");
+        const inventoryListBuilder = new ILBBase(item.user, item.object, snapshot.ref);
+        const inventoryListCreator = new InventoryListCreator(inventoryListBuilder);
+        return inventoryListCreator.create().createBatch().commit()
+    }
 
     /**
      * Удаляет все списки инвенторя в комнате

@@ -1,5 +1,6 @@
 import {JsonProperty, Serializable} from "typescript-json-serializer";
 import * as admin from "firebase-admin";
+import {Photo} from "./Photo";
 import Firestore = admin.firestore;
 
 @Serializable()
@@ -12,4 +13,6 @@ export class Room {
 
     @JsonProperty('inventories_count') inventoriesCount?: number;
     @JsonProperty('inventory_lists_count') inventoryListsCount?: number;
+
+    photos?: Photo[];
 }
