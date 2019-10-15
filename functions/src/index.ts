@@ -26,6 +26,10 @@ export const onInventoryPhotosDelete = functions.firestore
     .document(FirestoreCollection.Inventories + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
     .onDelete(handlers.photo.onDelete);
 
+export const onInventoryPhotosCreate = functions.firestore
+    .document(FirestoreCollection.Inventories + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
+    .onCreate(handlers.photo.onCreate);
+
 export const onInventoryListDelete = functions.firestore
     .document(FirestoreCollection.InventoryLists + "/{id}")
     .onDelete(handlers.inventoryList.onDelete);
@@ -70,6 +74,10 @@ export const onCaseToDoPhotosDelete = functions.firestore
     .document(FirestoreCollection.Tasks + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
     .onDelete(handlers.photo.onDelete);
 
+export const onCaseToDoPhotosCreate = functions.firestore
+    .document(FirestoreCollection.Tasks + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
+    .onCreate(handlers.photo.onCreate);
+
 export const onCaseToDoListDelete = functions.firestore
     .document(FirestoreCollection.TaskLists + "/{id}")
     .onDelete(handlers.taskList.onDelete);
@@ -89,6 +97,10 @@ export const onShoppingListItemDUpdate = functions.firestore
 export const onShoppingListItemPhotosDelete = functions.firestore
     .document(FirestoreCollection.Buys + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
     .onDelete(handlers.photo.onDelete);
+
+export const onShoppingListItemPhotosCreate = functions.firestore
+    .document(FirestoreCollection.Buys + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
+    .onCreate(handlers.photo.onCreate);
 
 export const onShoppingListDelete = functions.firestore
     .document(FirestoreCollection.BuyLists + "/{id}")
@@ -122,6 +134,10 @@ export const onRoomPhotosDelete = functions.firestore
     .document(FirestoreCollection.Rooms + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
     .onDelete(handlers.photo.onDelete);
 
+export const onRoomPhotosCreate = functions.firestore
+    .document(FirestoreCollection.Rooms + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
+    .onCreate(handlers.photo.onCreate);
+
 export const onHousingDelete = functions.firestore
     .document(FirestoreCollection.Housings + "/{id}")
     .onDelete(handlers.housing.onDelete);
@@ -129,6 +145,10 @@ export const onHousingDelete = functions.firestore
 export const onHousingPhotosDelete = functions.firestore
     .document(FirestoreCollection.Housings + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
     .onDelete(handlers.photo.onDelete);
+
+export const onHousingPhotosCreate = functions.firestore
+    .document(FirestoreCollection.Housings + "/{id}/" + FirestoreCollection.Photos + "/{photo_id}")
+    .onCreate(handlers.photo.onCreate);
 
 export const onNotificationCreate = functions.firestore
     .document(FirestoreCollection.Notifications + "/{id}")
