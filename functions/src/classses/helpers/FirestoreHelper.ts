@@ -41,14 +41,14 @@ export class FirestoreHelper {
         return documentReference.update(fieldPath, decrement);
     }
 
-    notificationScheduleId(timestamp: admin.firestore.Timestamp): string {
+    scheduleId(timestamp: admin.firestore.Timestamp): string {
         const timeMills = timestamp.toMillis() - timestamp.toMillis() % (60 * 1000);
         const date = new Date(timeMills);
         return date.toISOString();
     }
 
     notificationScheduleDoc(timestamp: admin.firestore.Timestamp): admin.firestore.DocumentReference {
-        const scheduleId = Helper.firestore().notificationScheduleId(timestamp);
+        const scheduleId = Helper.firestore().scheduleId(timestamp);
         return admin.firestore()
             .collection(FirestoreCollection.NotificationsSchedule)
             .doc(scheduleId)

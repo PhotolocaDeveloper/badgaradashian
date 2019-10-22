@@ -59,4 +59,12 @@ export class TaskHandler {
 
         return Promise.all(promises)
     }
+
+    onCheckerUpdate(change: Change<DocumentSnapshot>): Promise<any> {
+        return Functions.task().updateChecker(change).commit();
+    }
+
+    onCheckerDelete(snapshot: DocumentSnapshot): Promise<any> {
+        return Functions.task().deleteChecker(snapshot).commit();
+    }
 }

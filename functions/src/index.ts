@@ -54,6 +54,14 @@ export const onCaseToDoUpdate = functions.firestore
     .document(FirestoreCollection.Tasks + "/{id}")
     .onUpdate(handlers.task.onUpdate);
 
+export const onTaskCheckerUpdate = functions.firestore
+    .document(FirestoreCollection.Tasks + "/{id}")
+    .onUpdate(handlers.task.onCheckerUpdate);
+
+export const onTaskCheckerDelete = functions.firestore
+    .document(FirestoreCollection.Tasks + "/{id}")
+    .onDelete(handlers.task.onCheckerDelete);
+
 export const onLocalTaskItemCreate = functions.firestore
     .document(FirestoreCollection.TaskLists + "/{id}/" + FirestoreCollection.Tasks + "/{task_id}")
     .onCreate(handlers.taskListItem.onCreate);
@@ -177,6 +185,10 @@ export const onCalendarEventUpdate = functions.firestore
 export const sendingMessages = functions.pubsub
     .schedule('every 1 minutes')
     .onRun(schedule.sendingMessageScheduleFunction);
+
+export const resettingTaskCompletions = functions.pubsub
+    .schedule('every 1 minutes')
+    .onRun(schedule.resetTasksCompletion);
 
 export const generateAuthUrl = functions.https.onCall(https.calendar.generateAuthUrl);
 

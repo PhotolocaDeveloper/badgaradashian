@@ -12,6 +12,9 @@ import {CalendarEventCreator} from "../../classses/creators/CalendarEventCreator
 import {CalendarEventWrapper} from "../../classses/model/CalendarEventWrapper";
 import {calendar_v3} from "googleapis";
 import Schema$Event = calendar_v3.Schema$Event;
+import WriteBatch = admin.firestore.WriteBatch;
+import Timestamp = admin.firestore.Timestamp;
+import DocumentReference = admin.firestore.DocumentReference;
 
 export class TaskFunctions {
 
@@ -66,7 +69,7 @@ export class TaskFunctions {
         }
     }
 
-    createTaskInListCollection(snapshot: DocumentSnapshot, batch: admin.firestore.WriteBatch) {
+    createTaskInListCollection(snapshot: DocumentSnapshot, batch: WriteBatch) {
         if (snapshot === null || !snapshot.exists) return;
         const taskItem = deserialize(snapshot.data(), Task);
         if (taskItem.list) {
@@ -75,7 +78,7 @@ export class TaskFunctions {
         }
     }
 
-    deleteTaskInListCollection(snapshot: DocumentSnapshot, batch: admin.firestore.WriteBatch) {
+    deleteTaskInListCollection(snapshot: DocumentSnapshot, batch: WriteBatch) {
         if (snapshot === null || !snapshot.exists) return;
         const taskItem = deserialize(snapshot.data(), Task);
         if (taskItem.list) {
@@ -84,7 +87,7 @@ export class TaskFunctions {
         }
     }
 
-    updateTaskInListCollection(change: Change<DocumentSnapshot>, batch: admin.firestore.WriteBatch) {
+    updateTaskInListCollection(change: Change<DocumentSnapshot>, batch: WriteBatch) {
         console.info("Started: updateTaskInListCollection");
         const itemBefore = deserialize(change.before.data(), Task);
         const itemAfter = deserialize(change.after.data(), Task);
@@ -140,7 +143,7 @@ export class TaskFunctions {
      * @param after
      * @param batch
      */
-    updateTaskInHouseCount(before: DocumentSnapshot, after: DocumentSnapshot, batch: admin.firestore.WriteBatch) {
+    updateTaskInHouseCount(before: DocumentSnapshot, after: DocumentSnapshot, batch: WriteBatch) {
         console.info("Started: updateTaskInHouseCount");
         const itemBefore = deserialize(before.data(), Task);
         const itemAfter = deserialize(after.data(), Task);
@@ -160,7 +163,7 @@ export class TaskFunctions {
      * @param snapshot
      * @param batch
      */
-    incrementTaskInHouseCount(snapshot: DocumentSnapshot, batch?: admin.firestore.WriteBatch) {
+    incrementTaskInHouseCount(snapshot: DocumentSnapshot, batch?: WriteBatch) {
         const item = deserialize(snapshot.data(), Task);
         if (item.object === undefined) return Promise.resolve();
         if (batch !== undefined) {
@@ -175,7 +178,7 @@ export class TaskFunctions {
      * @param snapshot
      * @param batch
      */
-    decrementTaskInHouseCount(snapshot: DocumentSnapshot, batch?: admin.firestore.WriteBatch) {
+    decrementTaskInHouseCount(snapshot: DocumentSnapshot, batch?: WriteBatch) {
         const item = deserialize(snapshot.data(), Task);
         if (item.object === undefined) return Promise.resolve();
         if (batch !== undefined) {
@@ -191,7 +194,7 @@ export class TaskFunctions {
      * @param snapshot
      * @param batch
      */
-    incrementTotalInListCount(snapshot: DocumentSnapshot, batch: admin.firestore.WriteBatch) {
+    incrementTotalInListCount(snapshot: DocumentSnapshot, batch: WriteBatch) {
         const listRef = snapshot.ref.parent.parent;
         if (!listRef) return;
         Helper.firestore().incrementFieldWithBatch(batch, listRef, "items_count")
@@ -202,7 +205,7 @@ export class TaskFunctions {
      * @param snapshot
      * @param batch
      */
-    incrementCompetedInListCount(snapshot: DocumentSnapshot, batch: admin.firestore.WriteBatch) {
+    incrementCompetedInListCount(snapshot: DocumentSnapshot, batch: WriteBatch) {
         const listRef = snapshot.ref.parent.parent;
         const taskItem = deserialize(snapshot.data(), Task);
         if (!listRef || !taskItem.isDone) return;
@@ -214,7 +217,7 @@ export class TaskFunctions {
      * @param snapshot
      * @param batch
      */
-    decrementTotalInListCount(snapshot: DocumentSnapshot, batch: admin.firestore.WriteBatch) {
+    decrementTotalInListCount(snapshot: DocumentSnapshot, batch: WriteBatch) {
         const listRef = snapshot.ref.parent.parent;
         if (!listRef) return;
         Helper.firestore().decrementFieldWithBatch(batch, listRef, "items_count")
@@ -225,7 +228,7 @@ export class TaskFunctions {
      * @param snapshot
      * @param batch
      */
-    decrementCompetedInListCount(snapshot: DocumentSnapshot, batch: admin.firestore.WriteBatch) {
+    decrementCompetedInListCount(snapshot: DocumentSnapshot, batch: WriteBatch) {
         const listRef = snapshot.ref.parent.parent;
         const taskItem = deserialize(snapshot.data(), Task);
         if (!listRef || !taskItem.isDone) return;
@@ -259,6 +262,96 @@ export class TaskFunctions {
 
         console.info("Finished: deleteRelatedNotifications");
         return admin.firestore().collection(FirestoreCollection.Notifications).doc().create(serialize(notification));
+    }
+
+    updateChecker(change: Change<DocumentSnapshot>): WriteBatch {
+        const batch = admin.firestore().batch();
+
+        const taskBefore = deserialize(change.before.data(), Task);
+        const taskAfter = deserialize(change.after.data(), Task);
+
+        const isNextRepetitionDateChanged: boolean =
+            taskBefore.nextRepetitionDate !== undefined
+            && (taskAfter.nextRepetitionDate === undefined || taskBefore.nextRepetitionDate.toMillis() !== taskAfter.nextRepetitionDate.toMillis());
+
+        const isIsDoneChangedToTrue: boolean = taskBefore.isDone === false && taskAfter.isDone === true;
+        const isIsDoneChangedToFalse: boolean = taskBefore.isDone === true && taskAfter.isDone === false;
+
+        console.debug("Is 'nextRepetitionDate' changed = " + isNextRepetitionDateChanged);
+        console.debug("Is 'isDone' changed to 'true' = " + isIsDoneChangedToTrue);
+        console.debug("Is 'isDone' changed to 'false' = " + isIsDoneChangedToFalse);
+
+        const eventTime = Timestamp.now();
+
+        console.debug("Event time = " + eventTime.toDate().toISOString());
+
+        if (isNextRepetitionDateChanged || isIsDoneChangedToFalse) {
+            this.deleteChecker(undefined, change.before.ref, taskBefore, batch);
+        }
+
+        if (isIsDoneChangedToTrue && taskAfter.nextRepetitionDate) {
+
+            console.debug("Next repetition date = " + taskAfter.nextRepetitionDate.toDate().toISOString());
+
+            if (eventTime.toMillis() > taskAfter.nextRepetitionDate.toMillis()) {
+                this.resetChecker(undefined, change.after.ref, taskAfter, batch)
+            } else {
+                const scheduleTaskReference = this.getScheduleTaskReference(taskAfter.nextRepetitionDate, change.after.id);
+                batch.set(scheduleTaskReference, change.after.data()!)
+            }
+        }
+
+        return batch
+    }
+
+    resetChecker(snapshot?: DocumentSnapshot, _ref?: DocumentReference, _task?: Task, _batch?: WriteBatch): WriteBatch {
+        const batch = _batch || admin.firestore().batch();
+        const task = _task || deserialize(snapshot!.data(), Task);
+        const ref = _ref || snapshot!.ref;
+        const eventTime = Timestamp.now();
+
+        task.isDone = false;
+
+        if (task.nextRepetitionDate) {
+            task.lastRepetitionDate = task.nextRepetitionDate
+        }
+
+        if (task.dateToDo && task.repetitionRateMultiplier && task.repetitionRateTimeInterval) {
+            const nextRepetitionDate = Helper.date()
+                .calculateNextRepetitionDate(
+                    task.dateToDo.toDate(),
+                    eventTime.toDate(),
+                    task.repetitionRateTimeInterval,
+                    task.repetitionRateMultiplier);
+            task.nextRepetitionDate = Timestamp.fromDate(nextRepetitionDate);
+        }
+
+        batch.set(ref, serialize(task), {merge: true});
+        return batch;
+    }
+
+    deleteChecker(snapshot?: DocumentSnapshot, _ref?: DocumentReference, _task?: Task, _batch?: WriteBatch): WriteBatch {
+        const batch = _batch || admin.firestore().batch();
+        const task = _task || deserialize(snapshot!.data(), Task);
+        const ref = _ref || snapshot!.ref;
+        const nextDateToDo = task.nextRepetitionDate;
+        if (nextDateToDo) {
+            const scheduleTaskReference = this.getScheduleTaskReference(nextDateToDo, ref.id);
+            batch.delete(scheduleTaskReference);
+        }
+        batch.update(ref, {"is_done": false});
+        return batch
+    }
+
+    getScheduleCollection(timestamp: admin.firestore.Timestamp): admin.firestore.CollectionReference {
+        const nextDateToDoString = Helper.firestore().scheduleId(timestamp);
+        return admin.firestore()
+            .collection(FirestoreCollection.TaskChangeSchedule).doc(nextDateToDoString)
+            .collection(FirestoreCollection.Tasks)
+    }
+
+    getScheduleTaskReference(timestamp: admin.firestore.Timestamp, taskId: string): admin.firestore.DocumentReference {
+        return this.getScheduleCollection(timestamp).doc(taskId);
     }
 
 
