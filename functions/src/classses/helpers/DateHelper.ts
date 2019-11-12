@@ -10,21 +10,23 @@ export class DateHelper {
             case TimeInterval.Year:
                 return this.datePlusYear(dateToDo, now, multiplier);
             case TimeInterval.Week:
-                return this.datePlusInterval(dateToDo, now, multiplier, this.WEEK_MILLIS_DURATION);
+                return this.datePlusInterval(dateToDo, now, multiplier * this.WEEK_MILLIS_DURATION);
             case TimeInterval.Month:
                 return this.datePlusMonth(dateToDo, now, multiplier);
             case TimeInterval.Day:
-                return this.datePlusInterval(dateToDo, now, multiplier, this.DAY_MILLIS_DURATION)
+                return this.datePlusInterval(dateToDo, now, multiplier * this.DAY_MILLIS_DURATION)
         }
     }
 
-    datePlusInterval(date: Date, now: Date, multiplier: number, interval: number): Date {
-        const nowRates = Math.floor(now.getTime() / interval);
-        const dateRates = Math.floor(date.getTime() / interval);
-        const deltaRates = nowRates - dateRates;
-        const deltaIntervals = Math.floor(deltaRates / multiplier);
-        const intervalWeeks = (deltaIntervals + 1) * multiplier;
-        const newTime = date.getTime() + interval * intervalWeeks;
+    /**
+     * Расчитывает дату следующего повторения события после текущей даты
+     * @param date - Дата начального события
+     * @param now - Текущая дата
+     * @param interval - Интервал в милисекундах
+     */
+    datePlusInterval(date: Date, now: Date, interval: number): Date {
+        const deltaIntervals = Math.floor((now.getTime() - date.getTime()) / interval);
+        const newTime = date.getTime() + interval * (deltaIntervals + 1);
         return new Date(newTime)
 
     }

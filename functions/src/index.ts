@@ -42,38 +42,113 @@ export const onInventoryListUpdate = functions.firestore
     .document(FirestoreCollection.InventoryLists + "/{id}")
     .onUpdate(handlers.inventoryList.onUpdate);
 
+/***
+ * TASK FUNCTIONS
+ * - onCaseToDoCreate
+ * - taskCopyToLocalCollection
+ * - taskIncrementCounters
+ * - onCaseToDoDelete
+ * - taskDeleteFromLocalCollection
+ * - taskDecrementCounters
+ * - onCaseToDoUpdate
+ * - updateTaskCounters
+ * - updateTaskInLocalCollection
+ * - taskUpdateNextIterationDateAndCheckerState
+ * - onLocalTaskItemWrite
+ * - onCaseToDoPhotosDelete
+ * - onCaseToDoPhotosCreate
+ * - onCaseToDoListDelete
+ */
+
+/**
+ *  Task create handler:
+ *  - Create notification
+ *  - Create calendar event
+ */
 export const onCaseToDoCreate = functions.firestore
     .document(FirestoreCollection.Tasks + "/{id}")
     .onCreate(handlers.task.onCreate);
 
+/**
+ * Copy task to local collection
+ */
+export const taskCopyToLocalCollection = functions.firestore
+    .document(FirestoreCollection.Tasks + "/{id}")
+    .onCreate(handlers.task.copyToLocalCollection);
+
+/**
+ * Increment counters in relative task list and housing:
+ *  - Increment task count in housing
+ *  - Increment task count in task list
+ *  - Increment completed task count in task list if needed
+ *  - Increment completed task count in housing if needed
+ */
+export const taskIncrementCounters = functions.firestore
+    .document(FirestoreCollection.Tasks + "/{id}")
+    .onCreate(handlers.task.incrementTaskCounters);
+
+/**
+ * Task delete handler:
+ *  - Deleting related photos
+ *  - Deleting related calendar events
+ */
 export const onCaseToDoDelete = functions.firestore
     .document(FirestoreCollection.Tasks + "/{id}")
     .onDelete(handlers.task.onDelete);
 
+/**
+ * Delete task from local collection
+ */
+export const taskDeleteFromLocalCollection = functions.firestore
+    .document(FirestoreCollection.Tasks + "/{id}")
+    .onDelete(handlers.task.removeFromLocalCollection);
+
+/**
+ * Decrement counters in relative task list and housing:
+ *  - Decrement task count in task list
+ *  - Decrement completed task count in task list if needed
+ *  - Decrement task count in housing
+ *  - Decrement completed task count in housing if needed
+ */
+export const taskDecrementCounters = functions.firestore
+    .document(FirestoreCollection.Tasks + "/{id}")
+    .onDelete(handlers.task.decrementTaskCounters);
+
+/**
+ * Task update handler:
+ *  - Update related notification if `nextRepetitionDate` was changed
+ *  - Update calendar event
+ */
 export const onCaseToDoUpdate = functions.firestore
     .document(FirestoreCollection.Tasks + "/{id}")
     .onUpdate(handlers.task.onUpdate);
 
-export const onTaskCheckerUpdate = functions.firestore
+/**
+ * Updated task counters if needed:
+ *  - Update tasks count in task list if needed
+ *  - Update completed task count in related task list if needed
+ *  - Update tasks count in related housing
+ *  - Update completed tasks count in related housing if needed
+ */
+export const updateTaskCounters = functions.firestore
     .document(FirestoreCollection.Tasks + "/{id}")
-    .onUpdate(handlers.task.onCheckerUpdate);
+    .onUpdate(handlers.task.updateTaskCounters);
 
-export const onTaskCheckerDelete = functions.firestore
+/**
+ * Updated task in local collection if needed
+ */
+export const updateTaskInLocalCollection = functions.firestore
     .document(FirestoreCollection.Tasks + "/{id}")
-    .onDelete(handlers.task.onCheckerDelete);
+    .onUpdate(handlers.task.updateInLocalCollection);
 
-export const onLocalTaskItemCreate = functions.firestore
-    .document(FirestoreCollection.TaskLists + "/{id}/" + FirestoreCollection.Tasks + "/{task_id}")
-    .onCreate(handlers.taskListItem.onCreate);
+export const taskUpdateNextIterationDateAndCheckerState = functions.firestore
+    .document(FirestoreCollection.Tasks + "/{id}")
+    .onUpdate(handlers.task.updateNextIterationTime);
 
-export const onLocalTaskItemDelete = functions.firestore
-    .document(FirestoreCollection.TaskLists + "/{id}/" + FirestoreCollection.Tasks + "/{task_id}")
-    .onDelete(handlers.taskListItem.onDelete);
-
-export const onLocalTaskItemUpdate = functions.firestore
-    .document(FirestoreCollection.TaskLists + "/{id}/" + FirestoreCollection.Tasks + "/{task_id}")
-    .onUpdate(handlers.taskListItem.onUpdate);
-
+/**
+ * Handle write to task list sub collection with tasks:
+ *  - Update date_to_do in task list
+ */
 export const onLocalTaskItemWrite = functions.firestore
     .document(FirestoreCollection.TaskLists + "/{id}/" + FirestoreCollection.Tasks + "/{task_id}")
     .onWrite(handlers.taskListItem.onWrite);
