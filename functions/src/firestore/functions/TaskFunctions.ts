@@ -11,6 +11,8 @@ import {CEBPlanedTask} from "../../classses/builders/calendarEvents/CEBPlanedTas
 import {CalendarEventCreator} from "../../classses/creators/CalendarEventCreator";
 import {CalendarEventWrapper} from "../../classses/model/CalendarEventWrapper";
 import {calendar_v3} from "googleapis";
+import {Functions} from "../Functions";
+import {UpdateMethod} from "./CountableFunctions";
 import Schema$Event = calendar_v3.Schema$Event;
 import WriteBatch = admin.firestore.WriteBatch;
 import Timestamp = admin.firestore.Timestamp;
@@ -148,169 +150,95 @@ export class TaskFunctions {
     }
 
     /**
-     * Изменяет количество задач в связанных объектах если это необходимо
-     * @param before
-     * @param after
-     * @param _batch
+     * Update count of completed tasks in relative object when task's state changed
+     * is_done = (true -> false) or (false -> true)
+     * @param change
+     * @param refField
+     * @param counterField
+     * @param batch
      */
-    updateTasksCountInHouse(before: DocumentSnapshot, after: DocumentSnapshot, _batch?: WriteBatch): WriteBatch {
-        const batch = _batch || admin.firestore().batch();
-
-        const itemBefore = deserialize(before.data(), Task);
-        const itemAfter = deserialize(after.data(), Task);
-
-        // If objects are equal or undefined do nothing
-        if (itemBefore.object !== itemAfter.object
-            && itemBefore.object !== undefined
-            && itemAfter.object !== undefined
-            && itemBefore.object!.path === itemAfter.object!.path)
-            return batch;
-
-        // If objects are not equal and object before not undefined decrement tasks count in this object
-        if (itemBefore.object !== undefined) {
-            this.decrementTaskInHouseCount(before, batch);
-        }
-
-        // If objects are not equal and object after not undefined increment tasks count in this object
-        if (itemAfter.object !== undefined) {
-            this.incrementTaskInHouseCount(after, batch);
-        }
-
-        return batch
+    updateCompletionCountInRelativeObject(
+        change: Change<DocumentSnapshot>,
+        refField: string,
+        counterField: string,
+        batch: WriteBatch = admin.firestore().batch()
+    ): WriteBatch {
+        return Functions.countable()
+            .multiplyUpdate(Task, refField, counterField)
+            .setSnapshots([change.before, change.after])
+            .setBatch(batch)
+            .setConditions(values => {
+                const beforeDone = values[0].isDone || false;
+                const afterDone = values[1].isDone || false;
+                const isChecked = !beforeDone && afterDone;
+                const isUnChecked = !afterDone && beforeDone;
+                if (isChecked) return [UpdateMethod.None, UpdateMethod.Increment];
+                if (isUnChecked) return [UpdateMethod.Decrement, UpdateMethod.None];
+                return null
+            })
+            .update();
     }
 
     /**
-     * Updating completed task count in relative objects if needed
-     * @param before
-     * @param after
-     * @param _batch
+     * Update count of completed tasks in relative object if it was change and
+     * task was mark as completed
+     * @param change
+     * @param refField
+     * @param counterField
+     * @param reference
+     * @param batch
      */
-    updateCompletionTasksCountInHouse(before: DocumentSnapshot, after: DocumentSnapshot, _batch?: WriteBatch): WriteBatch {
-        const batch = _batch || admin.firestore().batch();
-
-        const itemBefore = deserialize(before.data(), Task);
-        const itemAfter = deserialize(after.data(), Task);
-
-        const beforeDone = itemBefore.isDone;
-        const afterDone = itemAfter.isDone;
-
-        // If task before and task after not checked do nothing
-        if (beforeDone === false && afterDone === false) return batch;
-
-        // If task before and task after checked and object changed increment checked
-        // tasks count in object after and decrement tasks count in object before
-        if (beforeDone === afterDone) {
-
-            // If objects are equal or undefined do nothing
-            if (itemBefore.object !== itemAfter.object
-                && itemBefore.object !== undefined
-                && itemAfter.object !== undefined
-                && itemBefore.object!.path === itemAfter.object!.path)
-                return batch;
-
-            // If objects are not equal and object before not undefined decrement tasks count in this object
-            this.decrementCompetedTaskCountInHousing(before, batch);
-
-            // If objects are not equal and object after not undefined increment tasks count in this object
-            this.incrementCompetedTaskCountInHousing(after, batch);
-
-            return batch;
-        }
-
-        const isChecked = (beforeDone === undefined || !beforeDone) && afterDone === true;
-
-        // If task was checked increment completed task count in object after
-        // Else decrement completed task count in object before
-        if (isChecked) {
-            this.incrementCompetedTaskCountInHousing(after, batch)
-        } else {
-            this.decrementCompetedTaskCountInHousing(before, batch)
-        }
-
-        return batch;
+    updateCompletionCountWhenRelativeObjectChanged(
+        change: Change<DocumentSnapshot>,
+        refField: string,
+        counterField: string,
+        reference: (task: Task) => DocumentReference | undefined,
+        batch: WriteBatch = admin.firestore().batch()
+    ): WriteBatch {
+        return Functions.countable()
+            .move(Task, change.before, change.after, refField, counterField)
+            .setBatch(batch)
+            .setCondition((valueFrom, valueTo) => {
+                const relativeObjectFrom = reference(valueFrom);
+                const relativeObjectTo = reference(valueTo);
+                return valueFrom.isDone === true && valueTo.isDone === true
+                    && !(relativeObjectFrom !== relativeObjectTo
+                        && relativeObjectFrom !== undefined
+                        && relativeObjectTo !== undefined
+                        && relativeObjectFrom.path === relativeObjectTo.path)
+            })
+            .move();
     }
 
     /**
-     * Updating completed task count in relative task list if needed
-     * @param before
-     * @param after
-     * @param _batch
+     * Decrement count of tasks in related object before
+     * and increment tasks count in related object  after
+     * if its was change
+     * @param change
+     * @param refField
+     * @param counterField
+     * @param reference
+     * @param batch
      */
-    updateCompletionTasksCountInTaskList(before: DocumentSnapshot, after: DocumentSnapshot, _batch?: WriteBatch): WriteBatch {
-        const batch = _batch || admin.firestore().batch();
-
-        const itemBefore = deserialize(before.data(), Task);
-        const itemAfter = deserialize(after.data(), Task);
-
-        const beforeDone = itemBefore.isDone;
-        const afterDone = itemAfter.isDone;
-
-        // If task before and task after not checked do nothing
-        if (beforeDone === false && afterDone === false) return batch;
-
-        // If task before and task after checked and task list changed increment checked
-        // tasks count in task list after and decrement tasks count in task list before
-        if (beforeDone === afterDone) {
-
-            // If objects are equal or undefined do nothing
-            if (itemBefore.object !== itemAfter.object
-                && itemBefore.object !== undefined
-                && itemAfter.object !== undefined
-                && itemBefore.object!.path === itemAfter.object!.path)
-                return batch;
-
-            // If objects are not equal and task list before not undefined decrement tasks count in this task list
-            this.decrementCompetedTasksCountInTaskList(before, batch);
-
-            // If objects are not equal and task list after not undefined increment tasks count in this task list
-            this.incrementCompetedTasksCountInTaskList(after, batch);
-
-            return batch;
-        }
-
-        const isChecked = (beforeDone === undefined || !beforeDone) && afterDone === true;
-
-        // If task was checked increment completed task count in task list after
-        // Else decrement completed task count in task list before
-        if (isChecked) {
-            this.incrementCompetedTasksCountInTaskList(after, batch)
-        } else {
-            this.decrementCompetedTasksCountInTaskList(before, batch)
-        }
-
-        return batch;
-    }
-
-    /**
-     * Updating tasks count in task list before and after
-     * @param before
-     * @param after
-     * @param _batch
-     */
-    updateTasksCountInTaskList(before: DocumentSnapshot, after: DocumentSnapshot, _batch?: WriteBatch): WriteBatch {
-        const batch = _batch || admin.firestore().batch();
-
-        const itemBefore = deserialize(before.data(), Task);
-        const itemAfter = deserialize(after.data(), Task);
-
-        // If lists are equal or undefined do nothing
-        if (itemBefore.list !== itemAfter.list
-            && itemBefore.list !== undefined
-            && itemAfter.list !== undefined
-            && itemBefore.list.path === itemAfter.list.path
-        ) return batch;
-
-        // If lists are not equal and list after not undefined increment tasks count in this list 
-        if (itemAfter.list !== undefined) {
-            this.incrementTotalInListCount(after, batch);
-        }
-
-        // If lists are not equal and list before not undefined decrement tasks count in this list 
-        if (itemBefore.list !== undefined) {
-            this.decrementTotalInListCount(before, batch);
-        }
-
-        return batch
+    updateCountInRelativeObject(
+        change: Change<DocumentSnapshot>,
+        refField: string,
+        counterField: string,
+        reference: (task: Task) => DocumentReference | undefined,
+        batch: WriteBatch = admin.firestore().batch()
+    ): WriteBatch {
+        return Functions.countable()
+            .move(Task, change.before, change.after, refField, counterField)
+            .setBatch(batch)
+            .setCondition((valueFrom, valueTo) => {
+                const relativeObjectFrom = reference(valueFrom);
+                const relativeObjectTo = reference(valueTo);
+                return !(relativeObjectFrom !== relativeObjectTo
+                    && relativeObjectFrom !== undefined
+                    && relativeObjectTo !== undefined
+                    && relativeObjectFrom.path === relativeObjectTo.path)
+            })
+            .move();
     }
 
     /**
@@ -391,97 +319,6 @@ export class TaskFunctions {
     }
 
     /**
-     * Увеличивает счётчик готовых задач в объекте если задача помечена как выполенная
-     * @param snapshot
-     * @param _batch
-     */
-    incrementCompetedTaskCountInHousing(snapshot: DocumentSnapshot, _batch?: WriteBatch): WriteBatch {
-        const batch = _batch || admin.firestore().batch();
-        const item = deserialize(snapshot.data(), Task);
-        const ref = item.object;
-        if (!ref || item.isDone !== true) return batch;
-        return Helper.firestore().incrementFieldWithBatch(batch, ref, "done_task_count")
-    }
-
-    /**
-     * Уменьшает счётчик готовых задач в объекте если задача помечена как выполенная
-     * @param snapshot
-     * @param _batch
-     */
-    decrementCompetedTaskCountInHousing(snapshot: DocumentSnapshot, _batch?: WriteBatch): WriteBatch {
-        const batch = _batch || admin.firestore().batch();
-        const item = deserialize(snapshot.data(), Task);
-        const ref = item.object;
-        if (!ref || item.isDone !== true) return batch;
-        return Helper.firestore().incrementFieldWithBatch(batch, ref, "done_task_count")
-    }
-
-    /**
-     * Увеличивает счетчик количества задач в списке дел на 1
-     * @param snapshot
-     * @param _batch
-     */
-    incrementTotalInListCount(snapshot: DocumentSnapshot, _batch?: WriteBatch): WriteBatch {
-        const batch = _batch || admin.firestore().batch();
-        const item = deserialize(snapshot.data(), Task);
-        const listRef = item.list;
-        if (!listRef) return batch;
-        Helper.firestore().incrementFieldWithBatch(batch, listRef, "items_count");
-        return batch;
-    }
-
-    /**
-     * Увеличивает счётчик готовых задач в списке дел
-     * @param snapshot
-     * @param _batch
-     */
-    incrementCompetedTasksCountInTaskList(snapshot: DocumentSnapshot, _batch?: WriteBatch): WriteBatch {
-        const batch = _batch || admin.firestore().batch();
-        const item = deserialize(snapshot.data(), Task);
-        const listRef = item.list;
-        if (!listRef || !item.isDone) return batch;
-        return Helper.firestore().incrementFieldWithBatch(batch, listRef, "done_item_count");
-    }
-
-    /**
-     * Уменьшает счетчик количества задач в списке дел на 1
-     * @param snapshot
-     * @param _batch
-     */
-    decrementTotalInListCount(snapshot: DocumentSnapshot, _batch?: WriteBatch): WriteBatch {
-        const batch = _batch || admin.firestore().batch();
-        const item = deserialize(snapshot.data(), Task);
-        const listRef = item.list;
-        if (!listRef) return batch;
-        return Helper.firestore().decrementFieldWithBatch(batch, listRef, "items_count")
-    }
-
-    /**
-     * Уменьшает колчиество готовых зада в списке задач если задача помечена как выполненая
-     * @param snapshot
-     * @param _batch
-     */
-    decrementCompetedTasksCountInTaskList(snapshot: DocumentSnapshot, _batch?: WriteBatch): WriteBatch {
-        const batch = _batch || admin.firestore().batch();
-        const item = deserialize(snapshot.data(), Task);
-        const listRef = item.list;
-        if (!listRef || item.isDone !== true) return batch;
-        return Helper.firestore().decrementFieldWithBatch(batch, listRef, "done_item_count")
-    }
-
-
-    updateCompletedTaskInListCount(change: Change<DocumentSnapshot>): Promise<any> {
-        const itemBefore = deserialize(change.before.data(), Task);
-        const itemAfter = deserialize(change.after.data(), Task);
-        const listRef = change.after.ref.parent.parent;
-        if (!listRef) return Promise.resolve();
-        let inc = 0;
-        if (itemBefore.isDone && !itemAfter.isDone) inc = -1;
-        if (!itemBefore.isDone && itemAfter.isDone) inc = 1;
-        return Helper.firestore().incrementField(listRef, "done_item_count", inc)
-    }
-
-    /**
      * Создаёт уведомление о необходимости выоплнить запланированное дело
      * @param snapshot
      */
@@ -497,49 +334,6 @@ export class TaskFunctions {
 
         console.info("Finished: deleteRelatedNotifications");
         return admin.firestore().collection(FirestoreCollection.Notifications).doc().create(serialize(notification));
-    }
-
-    updateChecker(change: Change<DocumentSnapshot>): WriteBatch {
-        const batch = admin.firestore().batch();
-
-        const taskBefore = deserialize(change.before.data(), Task);
-        const taskAfter = deserialize(change.after.data(), Task);
-
-        const isNextRepetitionDateChanged: boolean =
-            taskBefore.nextRepetitionDate !== undefined
-            && (taskAfter.nextRepetitionDate === undefined || taskBefore.nextRepetitionDate.toMillis() !== taskAfter.nextRepetitionDate.toMillis());
-
-        const isIsDoneChangedToTrue: boolean = taskBefore.isDone === false && taskAfter.isDone === true;
-        const isIsDoneChangedToFalse: boolean = taskBefore.isDone === true && taskAfter.isDone === false;
-
-        console.debug("Is 'nextRepetitionDate' changed = " + isNextRepetitionDateChanged);
-        console.debug("Is 'isDone' changed to 'true' = " + isIsDoneChangedToTrue);
-        console.debug("Is 'isDone' changed to 'false' = " + isIsDoneChangedToFalse);
-
-        const eventTime = Timestamp.now();
-
-        console.debug("Event time = " + eventTime.toDate().toISOString());
-
-        if (isNextRepetitionDateChanged || isIsDoneChangedToFalse) {
-            this.deleteChecker(undefined, change.before.ref, taskBefore, batch);
-        }
-
-        if (isIsDoneChangedToTrue
-            && taskAfter.repetitionRateMultiplier
-            && taskAfter.repetitionRateTimeInterval
-            && taskAfter.nextRepetitionDate) {
-
-            console.debug("Next repetition date = " + taskAfter.nextRepetitionDate.toDate().toISOString());
-
-            if (eventTime.toMillis() > taskAfter.nextRepetitionDate.toMillis()) {
-                this.resetChecker(undefined, change.after.ref, taskAfter, batch)
-            } else {
-                const scheduleTaskReference = this.getScheduleTaskReference(taskAfter.nextRepetitionDate, change.after.id);
-                batch.set(scheduleTaskReference, change.after.data()!)
-            }
-        }
-
-        return batch
     }
 
 
@@ -567,19 +361,6 @@ export class TaskFunctions {
 
         batch.set(ref, serialize(task), {merge: true});
         return batch;
-    }
-
-    deleteChecker(snapshot?: DocumentSnapshot, _ref?: DocumentReference, _task?: Task, _batch?: WriteBatch): WriteBatch {
-        const batch = _batch || admin.firestore().batch();
-        const task = _task || deserialize(snapshot!.data(), Task);
-        const ref = _ref || snapshot!.ref;
-        const nextDateToDo = task.nextRepetitionDate;
-        if (nextDateToDo) {
-            const scheduleTaskReference = this.getScheduleTaskReference(nextDateToDo, ref.id);
-            batch.delete(scheduleTaskReference);
-        }
-        batch.update(ref, {"is_done": false});
-        return batch
     }
 
     getScheduleCollection(timestamp: admin.firestore.Timestamp): admin.firestore.CollectionReference {

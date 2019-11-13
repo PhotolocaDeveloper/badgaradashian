@@ -8,6 +8,7 @@ import {InventoryListFunctions} from "./functions/InventoryListFunctions";
 import {TaskListFunctions} from "./functions/TaskListFunctions";
 import {NotificationFunctions} from "./functions/NotificationFunctions";
 import {CalendarEventFunctions} from "./functions/CalendarEventFunctions";
+import {CountableFunctions} from "./functions/CountableFunctions";
 
 export class Functions {
 
@@ -21,6 +22,7 @@ export class Functions {
     private static housingFunctions: HousingFunctions;
     private static notificationsFunctions: NotificationFunctions;
     private static calendarEventsFunctions: CalendarEventFunctions;
+    private static countableFuntions: CountableFunctions;
 
     static calendarEvent(): CalendarEventFunctions {
         if (!Functions.calendarEventsFunctions) {
@@ -90,5 +92,12 @@ export class Functions {
             Functions.housingFunctions = new HousingFunctions();
         }
         return Functions.housingFunctions;
+    }
+
+    static countable(): CountableFunctions {
+        if (!Functions.countableFuntions) {
+            Functions.countableFuntions = new CountableFunctions();
+        }
+        return Functions.countableFuntions;
     }
 }

@@ -78,4 +78,13 @@ export class GeneralFunctions {
         return batch
     }
 
+    updateCounter(snapshot: DocumentSnapshot, refField: string, counterField: string, count: number, _batch?: WriteBatch): WriteBatch {
+        const batch = _batch || admin.firestore().batch();
+        const ref: FirebaseFirestore.DocumentReference | null | undefined = snapshot.get(refField);
+        if (!ref) return batch;
+        return Helper.firestore().incrementFieldWithBatch(batch, ref, counterField);
+    }
+    
+
+
 }

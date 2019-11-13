@@ -3,6 +3,8 @@ import {Change} from "firebase-functions";
 import {Functions} from "../Functions";
 import {deserialize} from "typescript-json-serializer";
 import {Task} from "../../classses/model/Task";
+import {TaskList} from "../../classses/model/TaskList";
+import {Housing} from "../../classses/model/Housing";
 
 export class TaskHandler {
 
@@ -49,17 +51,63 @@ export class TaskHandler {
     }
 
     updateTaskCounters(change: Change<DocumentSnapshot>): Promise<any> {
+
         // Update tasks count in task list if needed
-        const taskCountInListUpdateBatch = Functions.task().updateTasksCountInTaskList(change.before, change.after);
+        const taskCountInListUpdateBatch = Functions.task()
+            .updateCountInRelativeObject(
+                change,
+                Task.Fields.LIST,
+                TaskList.Fields.ITEMS_COUNT,
+                task => {
+                    return task.list
+                });
+
+        // Move one done task to another list if list changed and task done state doesn't changed
+        Functions.task()
+            .updateCompletionCountWhenRelativeObjectChanged(
+                change,
+                Task.Fields.LIST,
+                TaskList.Fields.DONE_ITEMS_COUNT,
+                task => {
+                    return task.list
+                },
+                taskCountInListUpdateBatch);
 
         // Update completed task count in related task list if needed
-        Functions.task().updateCompletionTasksCountInTaskList(change.before, change.after, taskCountInListUpdateBatch);
+        Functions.task()
+            .updateCompletionCountInRelativeObject(
+                change,
+                Task.Fields.LIST,
+                TaskList.Fields.DONE_ITEMS_COUNT,
+                taskCountInListUpdateBatch);
 
         // Update tasks count in related housing
-        const taskCountInHouseUpdateBatch = Functions.task().updateTasksCountInHouse(change.before, change.after);
+        const taskCountInHouseUpdateBatch = Functions.task()
+            .updateCountInRelativeObject(
+                change,
+                Task.Fields.OBJECT,
+                Housing.Fields.TASKS_COUNT,
+                task => {
+                    return task.object
+                });
 
         // Update completed tasks count in related housing if needed
-        Functions.task().updateCompletionTasksCountInHouse(change.before, change.after, taskCountInHouseUpdateBatch);
+        Functions.task()
+            .updateCompletionCountInRelativeObject(
+                change,
+                Task.Fields.OBJECT,
+                Housing.Fields.DONE_TASKS_COUNT,
+                taskCountInHouseUpdateBatch);
+
+        Functions.task()
+            .updateCompletionCountWhenRelativeObjectChanged(
+                change,
+                Task.Fields.OBJECT,
+                Housing.Fields.DONE_TASKS_COUNT,
+                task => {
+                    return task.list
+                },
+                taskCountInHouseUpdateBatch);
 
         return Promise.all([
             taskCountInListUpdateBatch.commit(),
@@ -81,16 +129,30 @@ export class TaskHandler {
 
     incrementTaskCounters(snapshot: DocumentSnapshot): Promise<any> {
         // Incrementing task counts in tasks list
-        const taskListUpdateBatch = Functions.task().incrementTotalInListCount(snapshot);
+        const taskListUpdateBatch = Functions.countable()
+            .update(Task, snapshot, Task.Fields.LIST, TaskList.Fields.ITEMS_COUNT)
+            .increment();
 
         // Increment completed task count in task list if needed
-        Functions.task().incrementCompetedTasksCountInTaskList(snapshot, taskListUpdateBatch);
+        Functions.countable().update(Task, snapshot, Task.Fields.LIST, TaskList.Fields.DONE_ITEMS_COUNT)
+            .setBatch(taskListUpdateBatch)
+            .setCondition(value => {
+                return value.isDone === true
+            })
+            .increment();
 
         // Incrementing task counts in housing
-        const housingUpdateBatch = Functions.task().incrementTaskInHouseCount(snapshot);
+        const housingUpdateBatch = Functions.countable()
+            .update(Task, snapshot, Task.Fields.OBJECT, Housing.Fields.TASKS_COUNT)
+            .increment();
 
         // Increment completed task count in housing if needed
-        Functions.task().incrementCompetedTaskCountInHousing(snapshot, housingUpdateBatch);
+        Functions.countable().update(Task, snapshot, Task.Fields.OBJECT, Housing.Fields.DONE_TASKS_COUNT)
+            .setBatch(housingUpdateBatch)
+            .setCondition(value => {
+                return value.isDone === true
+            })
+            .increment();
 
         return Promise.all([
             taskListUpdateBatch.commit(),
@@ -108,16 +170,30 @@ export class TaskHandler {
 
     decrementTaskCounters(snapshot: DocumentSnapshot): Promise<any> {
         // Decrement task count in task list
-        const taskListUpdateBatch = Functions.task().decrementTotalInListCount(snapshot);
+        const taskListUpdateBatch = Functions.countable()
+            .update(Task, snapshot, Task.Fields.LIST, TaskList.Fields.ITEMS_COUNT)
+            .decrement();
 
         // Decrement completed task count in task list if needed
-        Functions.task().decrementCompetedTasksCountInTaskList(snapshot, taskListUpdateBatch);
+        Functions.countable().update(Task, snapshot, Task.Fields.LIST, TaskList.Fields.DONE_ITEMS_COUNT)
+            .setBatch(taskListUpdateBatch)
+            .setCondition(value => {
+                return value.isDone === true
+            })
+            .decrement();
 
         // Decrement task count in housing
-        const housingUpdateBatch = Functions.task().decrementTaskInHouseCount(snapshot);
+        const housingUpdateBatch = Functions.countable()
+            .update(Task, snapshot, Task.Fields.OBJECT, Housing.Fields.TASKS_COUNT)
+            .decrement();
 
         // Decrement completed task count in housing if needed
-        Functions.task().decrementCompetedTaskCountInHousing(snapshot, housingUpdateBatch);
+        Functions.countable().update(Task, snapshot, Task.Fields.OBJECT, Housing.Fields.DONE_TASKS_COUNT)
+            .setBatch(housingUpdateBatch)
+            .setCondition(value => {
+                return value.isDone === true
+            })
+            .decrement();
 
         return Promise.all([
             taskListUpdateBatch.commit(),
