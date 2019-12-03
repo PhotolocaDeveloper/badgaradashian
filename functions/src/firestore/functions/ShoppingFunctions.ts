@@ -7,6 +7,10 @@ import {ShoppingListItem} from "../../classses/model/ShoppingListItem";
 import {NBNeedToBuyObject} from "../../classses/builders/notifications/NBNeedToBuyObject";
 import {Helper} from "../../classses/helpers/Helper";
 import {Change} from "firebase-functions";
+import {Functions} from "../Functions";
+import {UpdateMethod} from "./CountableFunctions";
+import WriteBatch = admin.firestore.WriteBatch;
+import DocumentReference = admin.firestore.DocumentReference;
 
 export class ShoppingFunctions {
 
@@ -101,5 +105,97 @@ export class ShoppingFunctions {
         if (itemBefore.isDone && !itemAfter.isDone) inc = -1;
         if (!itemBefore.isDone && itemAfter.isDone) inc = 1;
         return Helper.firestore().incrementFieldWithBatch(batch, listRef, "done_item_count", inc)
+    }
+
+    /**
+     * Update count of completed tasks in relative object when task's state changed
+     * is_done = (true -> false) or (false -> true)
+     * @param change
+     * @param refField
+     * @param counterField
+     * @param batch
+     */
+    updateCompletionCountInRelativeObject(
+        change: Change<DocumentSnapshot>,
+        refField: string,
+        counterField: string,
+        batch: WriteBatch = admin.firestore().batch()
+    ): WriteBatch {
+        return Functions.countable()
+            .multiplyUpdate(ShoppingListItem, refField, counterField)
+            .setSnapshots([change.before, change.after])
+            .setBatch(batch)
+            .setConditions(values => {
+                const beforeDone = values[0].isDone || false;
+                const afterDone = values[1].isDone || false;
+                const isChecked = !beforeDone && afterDone;
+                const isUnChecked = !afterDone && beforeDone;
+                if (isChecked) return [UpdateMethod.None, UpdateMethod.Increment];
+                if (isUnChecked) return [UpdateMethod.Decrement, UpdateMethod.None];
+                return null
+            })
+            .update();
+    }
+
+    /**
+     * Update count of completed tasks in relative object if it was change and
+     * task was mark as completed
+     * @param change
+     * @param refField
+     * @param counterField
+     * @param reference
+     * @param batch
+     */
+    updateCompletionCountWhenRelativeObjectChanged(
+        change: Change<DocumentSnapshot>,
+        refField: string,
+        counterField: string,
+        reference: (task: ShoppingListItem) => DocumentReference | undefined,
+        batch: WriteBatch = admin.firestore().batch()
+    ): WriteBatch {
+        return Functions.countable()
+            .move(ShoppingListItem, change.before, change.after, refField, counterField)
+            .setBatch(batch)
+            .setCondition((valueFrom, valueTo) => {
+                const relativeObjectFrom = reference(valueFrom);
+                const relativeObjectTo = reference(valueTo);
+                return valueFrom.isDone === true && valueTo.isDone === true
+                    && !(relativeObjectFrom !== relativeObjectTo
+                        && relativeObjectFrom !== undefined
+                        && relativeObjectTo !== undefined
+                        && relativeObjectFrom.path === relativeObjectTo.path)
+            })
+            .move();
+    }
+
+    /**
+     * Decrement count of tasks in related object before
+     * and increment tasks count in related object  after
+     * if its was change
+     * @param change
+     * @param refField
+     * @param counterField
+     * @param reference
+     * @param batch
+     */
+    updateCountInRelativeObject(
+        change: Change<DocumentSnapshot>,
+        refField: string,
+        counterField: string,
+        reference: (task: ShoppingListItem) => DocumentReference | undefined,
+        batch: WriteBatch = admin.firestore().batch()
+    ): WriteBatch {
+        return Functions.countable()
+            .move(ShoppingListItem, change.before, change.after, refField, counterField)
+            .setBatch(batch)
+            .setCondition((valueFrom, valueTo) => {
+                const relativeObjectFrom = reference(valueFrom);
+                const relativeObjectTo = reference(valueTo);
+                return !(relativeObjectFrom !== relativeObjectTo
+                    && relativeObjectFrom !== undefined
+                    && relativeObjectTo !== undefined
+                    && relativeObjectFrom.path === relativeObjectTo.path)
+            })
+            .move();
     }
 }

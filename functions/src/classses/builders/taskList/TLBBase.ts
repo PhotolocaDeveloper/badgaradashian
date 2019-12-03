@@ -19,7 +19,7 @@ export class TLBBase extends TaskListBuilder {
     }
 
     buildName(): TaskListBuilder {
-        this.name = "Спиоск дел";
+        this.name = "Список задач";
         return this;
     }
 

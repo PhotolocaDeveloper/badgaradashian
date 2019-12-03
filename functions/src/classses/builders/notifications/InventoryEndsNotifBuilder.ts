@@ -18,7 +18,7 @@ export class InventoryEndsNotifBuilder extends NotificationBuilder {
     }
 
     public titleTemplate = "Проверь инвентарь";
-    public bodyTemplate = "Cрок службы инветнаря заканчивается {date_ends}";
+    public bodyTemplate = "Cрок службы инветнаря заканчивается";
 
     buildRecipient(): void {
         this.notification.recipient = this.recipientId;

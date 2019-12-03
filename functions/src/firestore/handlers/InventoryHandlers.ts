@@ -8,8 +8,7 @@ export class InventoryHandlers {
     onCreate(snapshot: DocumentSnapshot): Promise<any> {
         return Promise.all([
             Functions.inventory().createOnInventoryEndsNotification(snapshot),
-            Functions.inventory().createShoppingListItem(snapshot),
-            Functions.inventory().incrementCountInParentObjects(snapshot)
+            Functions.inventory().createShoppingListItem(snapshot)
         ])
     }
 
@@ -17,8 +16,7 @@ export class InventoryHandlers {
         return Promise.all([
             Functions.general().deleteRelatedNotifications(snapshot),
             Functions.general().deleteRelatedPhotos(snapshot),
-            Functions.inventory().deleteRelatedShoppingListItems(snapshot),
-            Functions.inventory().decrementCountInParentObjects(snapshot)
+            Functions.inventory().deleteRelatedShoppingListItems(snapshot)
         ]);
     }
 
@@ -26,9 +24,7 @@ export class InventoryHandlers {
         const inventoryBefore = deserialize(change.before.data(), Inventory);
         const inventoryAfter = deserialize(change.after.data(), Inventory);
 
-        const promises: Promise<any>[] = [
-            Functions.inventory().updateInventoryInListCount(change.before, change.after)
-        ];
+        const promises: Promise<any>[] = [];
 
         if (inventoryAfter.nextReplacementDate !== inventoryBefore.nextReplacementDate) {
             promises.concat([
