@@ -1,8 +1,8 @@
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
 import {Change} from "firebase-functions";
 import {Functions} from "../Functions";
-import {deserialize} from "typescript-json-serializer";
 import {Inventory} from "../../classses/model/Inventory";
+import {Helper} from "../../classses/helpers/Helper";
 
 export class InventoryHandlers {
     onCreate(snapshot: DocumentSnapshot): Promise<any> {
@@ -21,12 +21,12 @@ export class InventoryHandlers {
     }
 
     onUpdate(change: Change<DocumentSnapshot>): Promise<any> {
-        const inventoryBefore = deserialize(change.before.data(), Inventory);
-        const inventoryAfter = deserialize(change.after.data(), Inventory);
+        const inventoryBefore = Helper.firestore().deserialize(change.before, Inventory);
+        const inventoryAfter = Helper.firestore().deserialize(change.after, Inventory);
 
         const promises: Promise<any>[] = [];
 
-        if (inventoryAfter.nextReplacementDate !== inventoryBefore.nextReplacementDate) {
+        if (inventoryAfter?.nextReplacementDate !== inventoryBefore?.nextReplacementDate) {
             promises.concat([
                 Functions.general().deleteRelatedNotifications(change.before),
                 Functions.inventory().deleteRelatedShoppingListItems(change.before),

@@ -1,5 +1,5 @@
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
-import {deserialize, serialize} from "typescript-json-serializer";
+import {serialize} from "typescript-json-serializer";
 import {NotificationCreator} from "../../classses/creators/NotificationCreator";
 import * as admin from "firebase-admin";
 import {FirestoreCollection} from "../../enums/FirestoreCollection";
@@ -49,7 +49,12 @@ export class ShoppingFunctions {
      * @param snapshot
      */
     createOnShoppingListItemNeedToBuy(snapshot: DocumentSnapshot): Promise<any> {
-        const shoppingListItem = deserialize(snapshot.data(), ShoppingListItem);
+        const shoppingListItem = Helper.firestore().deserialize(snapshot, ShoppingListItem);
+
+        if (shoppingListItem === undefined) {
+            return Promise.reject("Can't deserialize 'ShoppingListItem'")
+        }
+
         const uid = shoppingListItem.user.id;
 
         if (shoppingListItem.dateToBuy === undefined) {
@@ -62,49 +67,6 @@ export class ShoppingFunctions {
         const notification = notificationCreator.construct().get();
 
         return admin.firestore().collection(FirestoreCollection.Notifications).doc().create(serialize(notification));
-    }
-
-    /**
-     * Увеличивает счётчик готовых задач в списке дел
-     * @param snapshot
-     * @param _batch
-     */
-    incrementCompetedInListCount(snapshot: DocumentSnapshot, _batch?: admin.firestore.WriteBatch) {
-        const batch = _batch || admin.firestore().batch();
-        const listRef = snapshot.ref.parent.parent;
-        const taskItem = deserialize(snapshot.data(), ShoppingListItem);
-        if (!listRef || !taskItem.isDone) return batch;
-        return Helper.firestore().incrementFieldWithBatch(batch, listRef, "done_item_count")
-    }
-
-    /**
-     * Уменьшает колчиество готовых зада в списке дел при удалении
-     * @param snapshot
-     * @param _batch
-     */
-    decrementCompetedInListCount(snapshot: DocumentSnapshot, _batch?: admin.firestore.WriteBatch) {
-        const batch = _batch || admin.firestore().batch();
-        const listRef = snapshot.ref.parent.parent;
-        const taskItem = deserialize(snapshot.data(), ShoppingListItem);
-        if (!listRef || !taskItem.isDone) return batch;
-        return Helper.firestore().decrementFieldWithBatch(batch, listRef, "done_item_count")
-    }
-
-    /**
-     *
-     * @param change
-     * @param _batch
-     */
-    updateCompletedTaskInListCount(change: Change<DocumentSnapshot>, _batch?: admin.firestore.WriteBatch) {
-        const batch = _batch || admin.firestore().batch();
-        const itemBefore = deserialize(change.before.data(), ShoppingListItem);
-        const itemAfter = deserialize(change.after.data(), ShoppingListItem);
-        const listRef = change.after.ref.parent.parent;
-        if (!listRef) return batch;
-        let inc = 0;
-        if (itemBefore.isDone && !itemAfter.isDone) inc = -1;
-        if (!itemBefore.isDone && itemAfter.isDone) inc = 1;
-        return Helper.firestore().incrementFieldWithBatch(batch, listRef, "done_item_count", inc)
     }
 
     /**

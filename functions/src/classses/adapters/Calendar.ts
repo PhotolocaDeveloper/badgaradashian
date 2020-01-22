@@ -3,11 +3,11 @@ import {IBSyncUserSettings} from "../builders/indetefires/IBSyncUserSettings";
 import {IdentifierCreator} from "../creators/IdentifierCreator";
 import * as admin from "firebase-admin";
 import {FirestoreCollection} from "../../enums/FirestoreCollection";
-import {deserialize} from "typescript-json-serializer";
 import {UserSettingSynchronization} from "../model/UserSettingSynchronization";
 import {OAuth2Client} from 'googleapis-common';
 import * as credentials from '../../credetials.json'
 import Schema$Event = calendar_v3.Schema$Event;
+import {Helper} from "../helpers/Helper";
 
 
 export class Calendar implements CalendarFunctions$EventDelegate {
@@ -41,8 +41,7 @@ export class Calendar implements CalendarFunctions$EventDelegate {
     private static async getSyncSettings(uid: string) {
         const ref = Calendar.getSyncSettingsRef(uid);
         const snapshot = await ref.get();
-        if (!snapshot.exists) return undefined;
-        return deserialize(snapshot.data(), UserSettingSynchronization)
+        return Helper.firestore().deserialize(snapshot, UserSettingSynchronization)
     }
 
     async generateAuthUrl(uid: string) {

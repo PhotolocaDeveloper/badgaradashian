@@ -1,12 +1,12 @@
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
 import {Change} from "firebase-functions";
 import {Functions} from "../Functions";
-import {deserialize} from "typescript-json-serializer";
 import {ShoppingListItem} from "../../classses/model/ShoppingListItem";
 import * as admin from "firebase-admin";
 import {FirestoreCollection} from "../../enums/FirestoreCollection";
 import {ShoppingList} from "../../classses/model/ShoppingList";
 import FieldPath = admin.firestore.FieldPath;
+import {Helper} from "../../classses/helpers/Helper";
 
 export class ShoppingListItemHandlers {
 
@@ -24,12 +24,12 @@ export class ShoppingListItemHandlers {
     }
 
     onUpdate(change: Change<DocumentSnapshot>): Promise<any> {
-        const caseToDoBefore = deserialize(change.before.data(), ShoppingListItem);
-        const caseToDoAfter = deserialize(change.after.data(), ShoppingListItem);
+        const caseToDoBefore = Helper.firestore().deserialize(change.before, ShoppingListItem);
+        const caseToDoAfter = Helper.firestore().deserialize(change.after, ShoppingListItem);
 
         const promises: Promise<any>[] = [];
 
-        if (caseToDoAfter.dateToBuy !== caseToDoBefore.dateToBuy) {
+        if (caseToDoAfter?.dateToBuy !== caseToDoBefore?.dateToBuy) {
             promises.concat([
                 Functions.general().deleteRelatedNotifications(change.before),
                 Functions.shopping().createOnShoppingListItemNeedToBuy(change.after)

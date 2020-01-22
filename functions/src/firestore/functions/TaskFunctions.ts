@@ -21,8 +21,8 @@ import DocumentReference = admin.firestore.DocumentReference;
 export class TaskFunctions {
 
     async createCalendarEvent(snapshot: DocumentSnapshot) {
-        const taskItem = deserialize(snapshot.data(), Task);
-        if (taskItem.nextRepetitionDate && taskItem.user) {
+        const taskItem = Helper.firestore().deserialize(snapshot, Task);
+        if (taskItem !== undefined && taskItem.nextRepetitionDate && taskItem.user) {
             const builder = new CEBPlanedTask(taskItem);
             const event = new CalendarEventCreator(builder).create().get();
             return this.saveCalendarEvent(event, taskItem.user, snapshot.ref);
@@ -50,7 +50,8 @@ export class TaskFunctions {
     }
 
     updateCalendarEvents(snapshot: DocumentSnapshot) {
-        const taskItem = deserialize(snapshot.data(), Task);
+        const taskItem = Helper.firestore().deserialize(snapshot, Task);
+        if (taskItem === undefined) return Promise.resolve();
         if (taskItem.nextRepetitionDate && taskItem.user) {
             const builder = new CEBPlanedTask(taskItem);
             const event = new CalendarEventCreator(builder).create().get();
@@ -76,8 +77,8 @@ export class TaskFunctions {
     createTaskInListCollection(snapshot: DocumentSnapshot, _batch?: WriteBatch): WriteBatch {
         const batch = _batch || admin.firestore().batch();
         if (snapshot === null || !snapshot.exists) return batch;
-        const taskItem = deserialize(snapshot.data(), Task);
-        if (taskItem.list) {
+        const taskItem = Helper.firestore().deserialize(snapshot, Task);
+        if (taskItem !== undefined && taskItem.list) {
             const docRef = taskItem.list.collection(FirestoreCollection.Tasks).doc(snapshot.id);
             batch.set(docRef, snapshot.data()!);
         }
@@ -86,9 +87,8 @@ export class TaskFunctions {
 
     deleteTaskInListCollection(snapshot: DocumentSnapshot, _batch?: WriteBatch): WriteBatch {
         const batch = _batch || admin.firestore().batch();
-        if (snapshot === null || !snapshot.exists) return batch;
-        const taskItem = deserialize(snapshot.data(), Task);
-        if (taskItem.list) {
+        const taskItem = Helper.firestore().deserialize(snapshot, Task);
+        if (taskItem !== undefined && taskItem.list) {
             const docRef = taskItem.list.collection(FirestoreCollection.Tasks).doc(snapshot.id);
             batch.delete(docRef);
         }
@@ -97,8 +97,16 @@ export class TaskFunctions {
 
     updateTaskInListCollection(change: Change<DocumentSnapshot>, _batch?: WriteBatch): WriteBatch {
         const batch = _batch || admin.firestore().batch();
-        const itemBefore = deserialize(change.before.data(), Task);
-        const itemAfter = deserialize(change.after.data(), Task);
+
+        const dataBefore = Helper.firestore().deserialize(change.before, Task);
+        const dataAfter = Helper.firestore().deserialize(change.after, Task);
+
+        if (dataBefore === undefined || dataAfter === undefined) {
+            return batch;
+        }
+
+        const itemBefore = deserialize(dataBefore, Task);
+        const itemAfter = deserialize(dataAfter, Task);
 
         const beforeListRef = itemBefore.list;
         const afterListRef = itemAfter.list;
@@ -251,11 +259,11 @@ export class TaskFunctions {
     updateTasksNextIterationDate(before: DocumentSnapshot, after: DocumentSnapshot, _batch?: WriteBatch): WriteBatch {
         const batch = _batch || admin.firestore().batch();
 
-        const itemBefore = deserialize(before.data(), Task);
-        const itemAfter = deserialize(after.data(), Task);
+        const itemBefore = Helper.firestore().deserialize(before, Task);
+        const itemAfter = Helper.firestore().deserialize(after, Task);
 
-        const beforeDone = itemBefore.isDone;
-        const afterDone = itemAfter.isDone;
+        const beforeDone = itemBefore?.isDone;
+        const afterDone = itemAfter?.isDone;
 
         const isChecked = (beforeDone === undefined || !beforeDone) && afterDone === true;
         const isUnChecked = (beforeDone === true) && (afterDone === undefined || !afterDone);
@@ -264,9 +272,9 @@ export class TaskFunctions {
         // - repetitionRateMultiplier
         // - repetitionRateTimeInterval
         // - nextRepetitionDate
-        if (itemAfter.repetitionRateMultiplier === undefined
-            || itemAfter.repetitionRateTimeInterval === undefined
-            || itemAfter.nextRepetitionDate === undefined)
+        if (itemAfter?.repetitionRateMultiplier === undefined
+            || itemAfter?.repetitionRateTimeInterval === undefined
+            || itemAfter?.nextRepetitionDate === undefined)
             return batch;
 
         const eventTime = admin.firestore.Timestamp.now();
@@ -301,8 +309,8 @@ export class TaskFunctions {
      */
     incrementTaskInHouseCount(snapshot: DocumentSnapshot, _batch?: WriteBatch): WriteBatch {
         const batch = _batch || admin.firestore().batch();
-        const item = deserialize(snapshot.data(), Task);
-        if (item.object === undefined) return batch;
+        const item = Helper.firestore().deserialize(snapshot, Task);
+        if (item?.object === undefined) return batch;
         return Helper.firestore().incrementFieldWithBatch(batch, item.object, "tasks_count");
     }
 
@@ -313,8 +321,8 @@ export class TaskFunctions {
      */
     decrementTaskInHouseCount(snapshot: DocumentSnapshot, _batch?: WriteBatch): WriteBatch {
         const batch = _batch || admin.firestore().batch();
-        const item = deserialize(snapshot.data(), Task);
-        if (item.object === undefined) return batch;
+        const item = Helper.firestore().deserialize(snapshot, Task);
+        if (item?.object === undefined) return batch;
         return Helper.firestore().decrementFieldWithBatch(batch, item.object, "tasks_count");
     }
 
@@ -323,25 +331,35 @@ export class TaskFunctions {
      * @param snapshot
      */
     createOnToDoCaseNotification(snapshot: DocumentSnapshot): Promise<any> {
-        console.info("Started: deleteRelatedNotifications");
-        const caseToDo = deserialize(snapshot.data(), Task);
-        const uid = caseToDo.user.id;
+        const caseToDo = Helper.firestore().deserialize(snapshot, Task);
+        const uid = caseToDo?.user.id;
+
+        if (!uid) {
+            return Promise.reject("UID is empty");
+        }
+
+        if (!caseToDo) {
+            return Promise.reject("Task not found");
+        }
 
         const notificationBuilder = new CaseToDoNotifBuilder(uid, snapshot.ref, caseToDo);
         const notificationCreator = new NotificationCreator(notificationBuilder);
 
         const notification = notificationCreator.construct().get();
 
-        console.info("Finished: deleteRelatedNotifications");
         return admin.firestore().collection(FirestoreCollection.Notifications).doc().create(serialize(notification));
     }
 
 
     resetChecker(snapshot?: DocumentSnapshot, _ref?: DocumentReference, _task?: Task, _batch?: WriteBatch): WriteBatch {
         const batch = _batch || admin.firestore().batch();
-        const task = _task || deserialize(snapshot!.data(), Task);
+        const task = _task || Helper.firestore().deserialize(snapshot!, Task);
         const ref = _ref || snapshot!.ref;
         const eventTime = Timestamp.now();
+
+        if (!task) {
+            return batch;
+        }
 
         task.isDone = false;
 

@@ -309,6 +309,9 @@ export const generateAuthUrl = functions.https.onCall(https.calendar.generateAut
 
 export const calendarOAuth = functions.https.onRequest((async (req, resp) => {
     const {code, state} = req.query;
-    https.calendar.calendarOAuth(state, code);
-    resp.send();
+    https.calendar.calendarOAuth(state, code).then(() => {
+        resp.send("Google calendar token successfully updated");
+    }).catch(() => {
+        resp.send("Google calendar token updating failed");
+    });
 }));

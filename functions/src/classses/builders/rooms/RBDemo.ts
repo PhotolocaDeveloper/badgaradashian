@@ -54,8 +54,8 @@ export class RBDemo extends RoomBuilder {
                 break;
         }
         const photo = new Photo();
-        photo.path = photoPath!;
-        photo.url = photoUrl!;
+        photo.path = photoPath;
+        photo.url = photoUrl;
         photo.dateCreated = Timestamp.now();
         return [photo];
     }

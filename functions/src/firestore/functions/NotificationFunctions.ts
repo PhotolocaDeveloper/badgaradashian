@@ -1,14 +1,12 @@
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
 import {NotificationPlanned} from "../../classses/model/NotificationPlanned";
-import {deserialize} from "typescript-json-serializer";
 import * as admin from "firebase-admin";
 import {Helper} from "../../classses/helpers/Helper";
 
 export class NotificationFunctions {
 
     private static toObject(snapshot: DocumentSnapshot): NotificationPlanned | undefined {
-        if (!snapshot.exists) return undefined;
-        return deserialize(snapshot.data(), NotificationPlanned)
+        return Helper.firestore().deserialize(snapshot, NotificationPlanned)
     }
 
     addToSchedule(snapshot: DocumentSnapshot, _batch?: admin.firestore.WriteBatch): admin.firestore.WriteBatch {

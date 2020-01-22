@@ -1,9 +1,9 @@
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
-import {deserialize} from "typescript-json-serializer";
 import {Photo} from "../../classses/model/Photo";
 import * as admin from "firebase-admin";
 import {Functions} from "../Functions";
 import FieldPath = admin.firestore.FieldPath;
+import {Helper} from "../../classses/helpers/Helper";
 
 export class PhotoHandlers {
 
@@ -15,8 +15,8 @@ export class PhotoHandlers {
 
     onDelete(snapshot: DocumentSnapshot): Promise<any> {
         const promises: Promise<any>[] = [];
-        const photo = deserialize(snapshot.data(), Photo);
-        if (photo.path !== undefined) {
+        const photo = Helper.firestore().deserialize(snapshot, Photo);
+        if (photo?.path !== undefined) {
             promises.concat([
                 admin.storage().bucket().file(photo.path).delete()
             ])

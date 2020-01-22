@@ -1,10 +1,10 @@
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
 import {Change} from "firebase-functions";
 import {Functions} from "../Functions";
-import {deserialize} from "typescript-json-serializer";
 import {Task} from "../../classses/model/Task";
 import {TaskList} from "../../classses/model/TaskList";
 import {Housing} from "../../classses/model/Housing";
+import {Helper} from "../../classses/helpers/Helper";
 
 export class TaskHandler {
 
@@ -29,13 +29,13 @@ export class TaskHandler {
     }
 
     onUpdate(change: Change<DocumentSnapshot>): Promise<any> {
-        const caseToDoBefore = deserialize(change.before.data(), Task);
-        const caseToDoAfter = deserialize(change.after.data(), Task);
+        const caseToDoBefore = Helper.firestore().deserialize(change.before, Task);
+        const caseToDoAfter = Helper.firestore().deserialize(change.after, Task);
 
         const promises: Promise<any>[] = [];
 
         // Update related notification if `nextRepetitionDate` was changed
-        if (caseToDoAfter.nextRepetitionDate !== caseToDoBefore.nextRepetitionDate) {
+        if (caseToDoAfter?.nextRepetitionDate !== caseToDoBefore?.nextRepetitionDate) {
             promises.concat([
                 Functions.general().deleteRelatedNotifications(change.before),
                 Functions.task().createOnToDoCaseNotification(change.after)

@@ -8,12 +8,7 @@ export class CalendarHttpsHandles {
         return CalendarHttpsHandles.calendar.generateAuthUrl(uid)
     }
 
-    calendarOAuth(uid: string, code: string) {
-        CalendarHttpsHandles.calendar.refreshOAuth2Tokens(uid, code).then(() => {
-            console.info("Google calendar token successfully updated");
-        }).catch(() => {
-            console.info("Google calendar token updating failed")
-        });
-
+    async calendarOAuth(uid: string, code: string) {
+        return CalendarHttpsHandles.calendar.refreshOAuth2Tokens(uid, code)
     }
 }

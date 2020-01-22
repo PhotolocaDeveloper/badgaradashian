@@ -1,7 +1,6 @@
 import {DocumentSnapshot} from "firebase-functions/lib/providers/firestore";
 import * as admin from "firebase-admin";
 import {Helper} from "../../classses/helpers/Helper";
-import {deserialize} from "typescript-json-serializer";
 import WriteBatch = admin.firestore.WriteBatch;
 import DocumentReference = admin.firestore.DocumentReference;
 
@@ -68,7 +67,7 @@ class CounterUpdater<T> {
 
     private isConditionTrue(): boolean {
         if (!this.condition) return true;
-        const value = deserialize(this.snapshot.data(), this.type);
+        const value = Helper.firestore().deserialize(this.snapshot, this.type)!;
         return this.condition(value)
     }
 
@@ -115,9 +114,12 @@ class MultiplyCounterUpdater<T> {
 
     private updateMethods(): UpdateMethod[] {
         if (!this.condition) return [];
-        const values: T[] = this.snapshots.map(snapshot => {
-            return deserialize(snapshot.data(), this.type)
-        });
+        const values: T[] = this.snapshots
+            .map(snapshot => {
+                return Helper.firestore().deserialize(snapshot, this.type)
+            })
+            .filter(data => data !== undefined)
+            .map(data => data!);
         return this.condition(values) || []
     }
 
@@ -180,8 +182,8 @@ class CounterMover<T> {
 
     private isConditionTrue(): boolean {
         if (!this.condition) return true;
-        const valueFrom = deserialize(this.snapFrom.data(), this.type);
-        const valueTo = deserialize(this.snapTo.data(), this.type);
+        const valueFrom = Helper.firestore().deserialize(this.snapFrom, this.type)!;
+        const valueTo = Helper.firestore().deserialize(this.snapTo, this.type)!;
         return this.condition(valueFrom, valueTo)
     }
 

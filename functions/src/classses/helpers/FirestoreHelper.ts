@@ -59,7 +59,12 @@ export class FirestoreHelper {
     }
 
     snapshotToObject<T>(snapshot: admin.firestore.DocumentSnapshot, type: new (...params: Array<any>) => T): T | undefined {
-        if (!snapshot.exists) return undefined;
-        return deserialize(snapshot.data(), type)
+        return this.deserialize(snapshot, type);
+    }
+
+    deserialize<T>(snapshot: admin.firestore.DocumentSnapshot, type: new (...params: Array<any>) => T): T | undefined {
+        const data = snapshot.data();
+        if (!snapshot.exists || data === undefined) return undefined;
+        return deserialize(data, type);
     }
 }
