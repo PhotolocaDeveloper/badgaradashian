@@ -40,15 +40,32 @@ export class DateHelper {
         return date;
     }
 
-    datePlusMonth(date: Date, now: Date, multiplier: number): Date {
+    datePlusMonth(date: Date, now: Date, multiplier: number) {
         const nowYear = now.getFullYear();
         const nowMonth = now.getMonth();
         const todoYear = date.getFullYear();
         const todoMonth = date.getMonth();
         const deltaMonth = (nowYear - todoYear) * 12 + nowMonth - todoMonth;
         const intervalMonth = (deltaMonth + multiplier) - (deltaMonth + multiplier) % multiplier;
-        date.setMonth(date.getMonth() + intervalMonth);
+        const nextMonthIndex = date.getMonth() + intervalMonth;
+        const maxDate = this.getMaxDayInMonth(date.getFullYear(), nextMonthIndex);
+        date.setMonth(date.getMonth() + intervalMonth, this.normalizeDate(date.getDate(), maxDate));
         return date;
+    }
+
+
+    getMaxDayInMonth(year: number, month: number) {
+        const beginMonth = new Date(year, month);
+        const endMonth = new Date(year, month + 1);
+        return (endMonth.getTime() - beginMonth.getTime()) / this.DAY_MILLIS_DURATION;
+    }
+
+    normalizeDate(date: number, maxDate: number): number {
+        if (date > maxDate) {
+            return maxDate;
+        } else {
+            return date
+        }
     }
 
 }
