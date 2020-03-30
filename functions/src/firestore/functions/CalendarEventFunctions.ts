@@ -35,31 +35,48 @@ export class CalendarEventFunctions {
         return batch;
     }
 
-    update(snapshot: DocumentSnapshot): Promise<any> {
+    async update(snapshot: DocumentSnapshot) {
         if (!snapshot.exists) return Promise.resolve();
         const eventWrapper = Helper.firestore().deserialize(snapshot, CalendarEventWrapper);
         if (!eventWrapper?.user || !eventWrapper?.event || !eventWrapper?.id) {
             return Promise.reject("User or event id not set");
         }
-        return Calendar.getInstance().event.update(eventWrapper.user.id, eventWrapper.id, eventWrapper.event);
+        return await Calendar.getInstance().event.update(eventWrapper.user.id, eventWrapper.id, eventWrapper.event);
     }
 
-    delete(snapshot: DocumentSnapshot): Promise<any> {
+    async delete(snapshot: DocumentSnapshot) {
         const eventWrapper = Helper.firestore().deserialize(snapshot, CalendarEventWrapper);
-        if (!eventWrapper?.user || !eventWrapper?.event || !eventWrapper?.id) {
-            return Promise.reject("User or event id not set");
+        if (!eventWrapper) {
+            return Promise.reject("Can't deserialize event data")
         }
-        return Calendar.getInstance().event.delete(eventWrapper.user.id, eventWrapper.id);
+        if (!eventWrapper?.user) {
+            return Promise.reject("Relative user is undefined");
+        }
+        if (!eventWrapper?.id) {
+            return Promise.reject("Event data is empty")
+        }
+        return await Calendar.getInstance().event.delete(eventWrapper.user.id, eventWrapper.id);
     }
 
-    create(snapshot: DocumentSnapshot): Promise<any> {
+    async create(snapshot: DocumentSnapshot) {
         const eventWrapper = Helper.firestore().deserialize(snapshot, CalendarEventWrapper);
-        if (!eventWrapper?.user || !eventWrapper?.event) {
-            return Promise.reject("User or event data not set");
+        if (!eventWrapper) {
+            return Promise.reject("Can't deserialize event data")
         }
-        return Calendar.getInstance().event.insert(eventWrapper.user.id, eventWrapper.event).then((res): Promise<any> => {
-            if (!res || !res.data) return Promise.resolve();
-            return snapshot.ref.update("id", res.data.id);
-        })
+        if (!eventWrapper?.user) {
+            return Promise.reject("Relative user is undefined");
+        }
+        if (!eventWrapper?.event) {
+            return Promise.reject("Event data is empty")
+        }
+        // Create event
+        const newEventData = await Calendar.getInstance().event.insert(eventWrapper.user.id, eventWrapper.event);
+
+        // Update calendar event data
+        if (newEventData && newEventData.data) {
+            return await snapshot.ref.update("id", newEventData.data.id);
+        } else {
+            return Promise.reject("Can not create calendar event uid: " + eventWrapper.user.id)
+        }
     }
 }

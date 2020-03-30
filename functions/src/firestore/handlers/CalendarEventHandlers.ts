@@ -3,25 +3,25 @@ import {Change} from "firebase-functions";
 import {Functions} from "../Functions";
 
 export class CalendarEventHandlers {
-
-    onCreate(snapshot: DocumentSnapshot): Promise<any> {
-        return Promise.all([
-            Functions.calendarEvent().copyToLocalCollections(snapshot).commit(),
-            Functions.calendarEvent().create(snapshot)
-        ])
+    // ON CREATE METHODS
+    async copyToLocalCollection(snapshot: DocumentSnapshot) {
+        return Functions.calendarEvent().copyToLocalCollections(snapshot).commit()
     }
-
-    onDelete(snapshot: DocumentSnapshot): Promise<any> {
-        return Promise.all([
-            Functions.calendarEvent().deleteFormLocalCollections(snapshot).commit(),
-            Functions.calendarEvent().delete(snapshot)
-        ])
+    async createGoogleCalendarEvent(snapshot: DocumentSnapshot) {
+        return Functions.calendarEvent().create(snapshot)
     }
-
-    onUpdate(change: Change<DocumentSnapshot>): Promise<any> {
-        return Promise.all([
-            Functions.calendarEvent().copyToLocalCollections(change.after).commit(),
-            Functions.calendarEvent().update(change.after)
-        ])
+    // ON DELETE METHODS
+    async deleteFromLocalCollection(snapshot: DocumentSnapshot) {
+        return Functions.calendarEvent().deleteFormLocalCollections(snapshot).commit()
+    }
+    async deleteGoogleCalendarEvent(snapshot: DocumentSnapshot) {
+        return Functions.calendarEvent().delete(snapshot)
+    }
+    // ON UPDATE METHODS
+    async updateInLocalCollection(change: Change<DocumentSnapshot>) {
+        return Functions.calendarEvent().copyToLocalCollections(change.after).commit()
+    }
+    async updateGoogleCalendarEvent(change: Change<DocumentSnapshot>) {
+        return Functions.calendarEvent().update(change.after)
     }
 }

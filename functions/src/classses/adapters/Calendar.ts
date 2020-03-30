@@ -74,13 +74,13 @@ class CalendarFunctions$Event {
     }
 
     async insert(uid: string, event: Schema$Event) {
-        const oauth2Client = await this.delegate.getOAuth2Client(uid);
-        if (!oauth2Client) return Promise.resolve();
-        return this.calendar.events.insert({
-            auth: oauth2Client,
-            calendarId: 'primary',
-            requestBody: event
-        })
+        return await this.delegate.getOAuth2Client(uid).then(oauth2Client => {
+            return this.calendar.events.insert({
+                auth: oauth2Client,
+                calendarId: 'primary',
+                requestBody: event
+            })
+        });
     }
 
     async update(uid: string, eventId: string, event: Schema$Event) {
