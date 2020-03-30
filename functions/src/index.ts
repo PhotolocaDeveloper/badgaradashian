@@ -285,17 +285,32 @@ export const onNotificationUpdate = functions.firestore
     .document(FirestoreCollection.Notifications + "/{id}")
     .onUpdate(handlers.notifications.onUpdate);
 
-export const onCalendarEventCreate = functions.firestore
+/**
+ * Create google calendar event if syncronization is available
+ */
+export const calendarEvent_CreateGoogleCalendarEvent = functions.firestore
     .document(FirestoreCollection.CalendarEvents + "/{id}")
-    .onCreate(handlers.calendarEvent.onCreate);
+    .onCreate(handlers.calendarEvent.createGoogleCalendarEvent);
 
-export const onCalendarEventDelete = functions.firestore
+export const calendarEvent_CopyToLocalCollection = functions.firestore
     .document(FirestoreCollection.CalendarEvents + "/{id}")
-    .onDelete(handlers.calendarEvent.onDelete);
+    .onCreate(handlers.calendarEvent.copyToLocalCollection);
 
-export const onCalendarEventUpdate = functions.firestore
+export const calendarEvent_DeleteFromLocalCollection = functions.firestore
     .document(FirestoreCollection.CalendarEvents + "/{id}")
-    .onUpdate(handlers.calendarEvent.onUpdate);
+    .onDelete(handlers.calendarEvent.deleteFromLocalCollection);
+
+export const calendarEvent_DeleteGoogleCalendarEvent = functions.firestore
+    .document(FirestoreCollection.CalendarEvents + "/{id}")
+    .onDelete(handlers.calendarEvent.deleteGoogleCalendarEvent);
+
+export const calendarEvent_UpdateInLocalCollection = functions.firestore
+    .document(FirestoreCollection.CalendarEvents + "/{id}")
+    .onUpdate(handlers.calendarEvent.updateInLocalCollection);
+
+export const calendarEvent_UpdateGoogleCalendarEvent = functions.firestore
+    .document(FirestoreCollection.CalendarEvents + "/{id}")
+    .onUpdate(handlers.calendarEvent.updateGoogleCalendarEvent);
 
 export const sendingMessages = functions.pubsub
     .schedule('every 1 minutes')
